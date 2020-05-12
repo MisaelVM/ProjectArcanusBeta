@@ -3,8 +3,7 @@
 int main() {
     sf::RenderWindow window(sf::VideoMode(200, 200), "ArcanusBeta");
     sf::CircleShape shape(50.f);
-    //shape.setFillColor(sf::Color::Green);
-    shape.setFillColor(sf::Color::Blue);
+    shape.setFillColor(sf::Color::Green);
 
     while (window.isOpen()) {
         sf::Event event;
