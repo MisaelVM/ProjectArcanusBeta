@@ -4,7 +4,7 @@
 using namespace std;
 
 
-class elemento // clase para definir un elemento
+class elemento
 {
     string nombre;
 public:
@@ -31,7 +31,7 @@ public:
 
 };
 
-class rama_elemental  // conjunto de objetos de tipo 'elemento' diseñados para formar una tabla de debilidades/fortalezas
+class rama_elemental
 {
 
     elemento *lista;
@@ -114,7 +114,7 @@ public:
 
 };
 
-class estadistica // clase que representa una estadistica de un personaje/enemigo y su valor: ejemplo "vida","ataque","defensa"
+class estadistica
 {
 
     string nombre;
@@ -157,7 +157,7 @@ public:
     }
 };
 
-class stats //conjunto de objetos "estadistica" que sirve para clasificar mejor los nombres
+class stats
 {
     int tamano;
 public:
@@ -212,7 +212,7 @@ public:
     }
 };
 
-class nivel // clase que representa nivel de la entidad, a su vez proporciona datos y funciones como experiencia para crear el proceso
+class nivel
 {
     double nive;
     double experiencia;
@@ -297,8 +297,7 @@ public:
 
 };
 
-class estado // clase estado que representa un estado alterado de un personaje, la variable string "codigo_efecto" es un codigo
-            // para acceder a distintas funcionalidades (en otras versiones :V)
+class estado
 {
     string nombre;
     string codigo_efecto;
@@ -336,7 +335,7 @@ public:
     }
 };
 
-class habilidad // clase que representa la habilidad varia de un personaje, por ahora se limita a atques de daño
+class habilidad
 {
     string nombre;
     int potencia;
@@ -403,7 +402,7 @@ public:
     }
 };
 
-class item // genera objeto padre item (objeto)
+class item
 {
 protected:
     string name;
@@ -437,7 +436,7 @@ public:
     }
 };
 
-class tipo_de_arma // tipo de arma represenado por un string
+class tipo_de_arma
 {
     string tipo;
 public:
@@ -459,7 +458,7 @@ public:
     }
 };
 
-class rama_tipos_arma //sistema que abre una lista de tipos de arma, retorna un codigo char
+class rama_tipos_arma
 {
     tipo_de_arma *T;
     int tamano;
@@ -482,7 +481,7 @@ public:
     }
 };
 
-class weapon:item // objeto equipable, aqui se crean armas, armaduras entre otras
+class weapon:item
 {
     int tamano;
     string *stat_mejorado;
@@ -578,7 +577,7 @@ public:
 };
 
 
-class clase // conjunto de parametros y habilidades que delimitan un estilo de personaje, ademas de estadisticas
+class clase
 {
     string nombre;
     int tam;
@@ -696,7 +695,7 @@ public:
 
 
 
-class entidad // genera una entidad ya sea npc, personaje o enemigo en base a las clases creadas
+class entidad
 {
 protected:
     string nombre;
