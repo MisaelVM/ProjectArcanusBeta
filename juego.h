@@ -14,12 +14,13 @@ private:
 	sf::Clock sfElapsedTimeClock;
 	float fElapsedTime;
 	sf::View camera;	
+	const float cameraspeed = 6.0f; //velocidad con la que la camara se desplaza
 public:	
 	juego(int width, int high, std::string title);
 	void gameloop();
 	void draw();
 	void updateElapsedTime();
-	void process_events();
-	void process_generalevents();
+	void checkcamera();//funcion que tiene que ver con la camera
+	
 };
 
