@@ -55,6 +55,7 @@ void GameEngine::updateEvents() {
 
 void GameEngine::update() { // Updates data in general
     updateEvents();
+    player.update(fElapsedTime);
 }
 
 void GameEngine::draw() { // Draws Items

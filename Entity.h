@@ -15,11 +15,14 @@ private:
 
 protected:
 	sf::RectangleShape sfShape; // The entity will be shown as a Rectangle/Square
+	float fMovementSpeed;
 
 public:
 	// -- CONSTRUCTOR/DESTRUCTOR --
 	Entity();
 	virtual ~Entity();
+
+	virtual void move(const int towardsX, const int towardsY, const float &fElapsedTime); // Moves our Entity
 
 	// Main Functions
 	virtual void update(const float &fElapsedTime); // Updates our Entity's data
