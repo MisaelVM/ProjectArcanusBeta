@@ -42,7 +42,7 @@ void GameEngine::start() { // Starts/Launches the game
     while (sfWindow->isOpen()) { // Game Loop
         updateElapsedTime(); // Always updating the Elapsed Time
         update(); // Always updating the window
-        render(); // Always rendering items
+        draw(); // Always drawing items
     }
 }
 
@@ -57,8 +57,9 @@ void GameEngine::update() { // Updates data in general
     updateEvents();
 }
 
-void GameEngine::render() { // Renders Items
+void GameEngine::draw() { // Draws Items
     sfWindow->clear();
+    player.draw(sfWindow);
     sfWindow->display();
 }
 

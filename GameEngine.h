@@ -1,14 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
-#include "SFML/System.hpp"
-#include "SFML/Window.hpp"
-#include "SFML/Graphics.hpp"
-#include "SFML/Audio.hpp"
-#include "SFML/Network.hpp"
+#include "Entity.h"
 
 class GameEngine {
 private:
@@ -17,6 +9,8 @@ private:
 
 	sf::Clock sfElapsedTimeClock;
 	float fElapsedTime; // aka Delta Time
+
+	Entity player;
 
 	// Constructor's functions
 	void constructWindow();
@@ -30,6 +24,6 @@ public:
 	void start();
 	void updateEvents();
 	void update();
-	void render();
+	void draw();
 	void updateElapsedTime();
 };
