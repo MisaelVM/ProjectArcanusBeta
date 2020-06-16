@@ -40,5 +40,5 @@ void Entity::update(const float &fElapsedTime) {
 }
 
 void Entity::draw(sf::RenderTarget *sfTarget) { // Draws our Entity
-	sfTarget->draw(sfShape);
+	sfTarget->draw(*sfSprite);
 }

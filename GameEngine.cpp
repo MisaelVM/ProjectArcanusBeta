@@ -3,10 +3,14 @@
 // -- CONSTRUCTOR/DESTRUCTOR'S DEFINITIONS --
 GameEngine::GameEngine() { // Class' Constructor - Calls its functions
     constructWindow();
+
+    sfResourcesTextures->loadFromFile("Resources/texture1.png"); // Loads textures
+    player = new Player(25, 25, sfResourcesTextures); // Initializes player
 }
 
 GameEngine::~GameEngine() { // Class' Destructor - Clears memory
 	delete sfWindow;
+    delete player;
 }
 
 // Constructor's Functions
@@ -55,12 +59,12 @@ void GameEngine::updateEvents() {
 
 void GameEngine::update() { // Updates data in general
     updateEvents();
-    player.update(fElapsedTime);
+    player->update(fElapsedTime); // Control/Movement
 }
 
 void GameEngine::draw() { // Draws Items
     sfWindow->clear();
-    player.draw(sfWindow);
+    player->draw(sfWindow);
     sfWindow->display();
 }
 

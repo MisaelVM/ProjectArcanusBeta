@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "Player.h"
 
 class GameEngine {
 private:
@@ -10,7 +10,8 @@ private:
 	sf::Clock sfElapsedTimeClock;
 	float fElapsedTime; // aka Delta Time
 
-	Entity player;
+	Player *player;
+	sf::Texture *sfResourcesTextures; // Textures that will be loaded in the game
 
 	// Constructor's functions
 	void constructWindow();
