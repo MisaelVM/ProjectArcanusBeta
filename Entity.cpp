@@ -27,7 +27,7 @@ void Entity::setPosition(const float x, const float y) {
 }
 
 void Entity::move(const int towardsX, const int towardsY, const float &fElapsedTime) { // Moves our Entity
-	sfShape.move(towardsX * fMovementSpeed * fElapsedTime, towardsY * fMovementSpeed * fElapsedTime); /* REMINDER: Use a sf::Vector2f with this function instead of this way */
+	sfSprite->move(towardsX * fMovementSpeed * fElapsedTime, towardsY * fMovementSpeed * fElapsedTime); /* REMINDER: Use a sf::Vector2f with this function instead of this way */
 }
 
 // Main Functions

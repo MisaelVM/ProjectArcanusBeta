@@ -4,8 +4,8 @@
 GameEngine::GameEngine() { // Class' Constructor - Calls its functions
     constructWindow();
 
-    sfResourcesTextures->loadFromFile("Resources/texture1.png"); // Loads textures
-    player = new Player(25, 25, sfResourcesTextures); // Initializes player
+    sfResourcesTextures.loadFromFile("Resources/texture1.png"); // Loads textures
+    player = new Player(25, 25, &sfResourcesTextures); // Initializes player
 }
 
 GameEngine::~GameEngine() { // Class' Destructor - Clears memory
