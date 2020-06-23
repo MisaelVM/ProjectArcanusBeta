@@ -11,9 +11,18 @@ private:
 	sf::Sprite sfSprite;
 	sf::Texture sfTexture;
 
+	sf::IntRect sfFrame;
+
 	float fFrameChronometer;
+	float fFrameTime;
+
+	int nFrameWidth;
+	int nFrameHeight;
+
+	int nStartingFramePos;
+	int nFinalFramePos;
 
 public:
-	Animation(sf::Sprite &_sfSprite, sf::Texture &_sfTexture, float fTime, int nWidth, int nHeight);
+	Animation(sf::Sprite &_sfSprite, sf::Texture &_sfTexture, float fTime, int _nFrameWidth, int _nFrameHeight, int _nStartingFramePos, int _nFinalFramePos);
 	void play(const float &fElapsedTime);
 };
