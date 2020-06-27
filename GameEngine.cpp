@@ -4,8 +4,8 @@
 GameEngine::GameEngine() { // Class' Constructor - Calls its functions
     constructWindow();
 
-    sfResourcesTextures.loadFromFile("Resources/texture1.png"); // Loads textures
-    player = new Player(25, 25, &sfResourcesTextures); // Initializes player
+    mResourceTextures["ARIEL_SHEET"].loadFromFile("Resources/ARIEL_SHEET.png"); // Loads textures
+    player = new Player(25, 25, mResourceTextures["ARIEL_SHEET"]); // Initializes player
 }
 
 GameEngine::~GameEngine() { // Class' Destructor - Clears memory

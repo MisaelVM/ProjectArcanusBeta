@@ -6,5 +6,9 @@ class Player : public Entity {
 private:
 
 public:
-	Player(const float x, const float y, sf::Texture *sfTexture);
+	// -- CONSTRUCTOR --
+	Player(const float x, const float y, sf::Texture &sfTexture);
+
+	// Main functions
+	void update(const float &fElapsedTime);
 };

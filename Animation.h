@@ -8,8 +8,8 @@
 
 class Animation {
 private:
-	sf::Sprite sfSprite;
-	sf::Texture sfTexture;
+	sf::Texture &sfTexture;
+	sf::Sprite &sfSprite;
 
 	sf::IntRect sfFrame;
 
@@ -19,10 +19,12 @@ private:
 	int nFrameWidth;
 	int nFrameHeight;
 
-	int nStartingFramePos;
-	int nFinalFramePos;
+	int nStartingFramePosX;
+	int nStartingFramePosY;
+	int nFinalFramePosX;
+	int nFinalFramePosY;
 
 public:
-	Animation(sf::Sprite &_sfSprite, sf::Texture &_sfTexture, float fTime, int _nFrameWidth, int _nFrameHeight, int _nStartingFramePos, int _nFinalFramePos);
+	Animation(sf::Sprite &_sfSprite, sf::Texture &_sfTexture, float fTime, int _nFrameWidth, int _nFrameHeight, int _nStartingFramePosX, int _nStartingFramePosY, int _nFinalFramePosX, int _nFinalFramePosY);
 	void play(const float &fElapsedTime);
 };

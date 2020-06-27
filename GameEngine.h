@@ -11,7 +11,7 @@ private:
 	float fElapsedTime; // aka Delta Time
 
 	Player *player;
-	sf::Texture sfResourcesTextures; // Textures that will be loaded in the game
+	std::map<std::string, sf::Texture> mResourceTextures; // Textures that will be loaded in the game
 
 	// Constructor's functions
 	void constructWindow();
