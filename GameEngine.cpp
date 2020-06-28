@@ -44,7 +44,6 @@ void GameEngine::constructWindow() { // Constructs game's window and initializes
 // Main Functions - for handling our game
 void GameEngine::start() { // Starts/Launches the game
     while (sfWindow->isOpen()) { // Game Loop
-        updateElapsedTime(); // Always updating the Elapsed Time
         update(); // Always updating the window
         draw(); // Always drawing items
     }
@@ -58,7 +57,8 @@ void GameEngine::updateEvents() {
 }
 
 void GameEngine::update() { // Updates data in general
-    updateEvents();
+    updateElapsedTime(); // Always updating the Elapsed Time
+    updateEvents(); // Always updating the SFML's events
     player->update(fElapsedTime); // Control/Movement
 }
 

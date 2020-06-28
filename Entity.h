@@ -33,11 +33,15 @@ public:
 	Entity();
 	virtual ~Entity();
 
-	// Functions
+	// Transform
 	virtual void setPosition(const float x, const float y);
-	virtual void move(const int towardsX, const int towardsY, const float &fElapsedTime); // Moves our Entity
+	virtual void setRotation(const float angle);
+	virtual void setScale(const float x, const float y);
+
+	// Functions
+	virtual void move(const float towardsX, const float towardsY, const float &fElapsedTime); // Moves our Entity
 
 	// Main Functions
 	virtual void update(const float &fElapsedTime) = 0; // Updates our Entity's data
-	virtual void draw(sf::RenderTarget *sfTarget); // Draws our Entity
+	virtual void draw(sf::RenderTarget *sfTarget) = 0; // Draws our Entity
 };

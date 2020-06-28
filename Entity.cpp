@@ -20,16 +20,20 @@ void Entity::constructAnimatorSystem(sf::Texture &sfTextureSheet) {  // Construc
 	animatorSystem = new AnimatorSystem(sfSprite, sfTextureSheet);
 }
 
-// Functions
+// Transform
 void Entity::setPosition(const float x, const float y) {
 	sfSprite.setPosition(x, y);
 }
 
-void Entity::move(const int towardsX, const int towardsY, const float &fElapsedTime) { // Moves our Entity
-	sfSprite.move(towardsX * fMovementSpeed * fElapsedTime, towardsY * fMovementSpeed * fElapsedTime); /* REMINDER: Use a sf::Vector2f with this function instead of this way */
+void Entity::setRotation(const float angle) {
+	sfSprite.setRotation(angle);
 }
 
-// Main Functions
-void Entity::draw(sf::RenderTarget *sfTarget) { // Draws our Entity
-	sfTarget->draw(sfSprite);
+void Entity::setScale(const float x, const float y) {
+	sfSprite.setScale(x, y);
+}
+
+// Functions
+void Entity::move(const float towardsX, const float towardsY, const float &fElapsedTime) { // Moves our Entity
+	sfSprite.move(towardsX * fElapsedTime, towardsY * fElapsedTime);
 }

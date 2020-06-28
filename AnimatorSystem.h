@@ -10,6 +10,8 @@ private:
 	sf::Texture &sfTexture;
 	sf::Sprite &sfSprite;
 
+	Animation *framePointer;
+
 	// Stores the animations
 	std::map<std::string, Animation*> mAnimations;
 

@@ -25,6 +25,10 @@ private:
 	int nFinalFramePosY;
 
 public:
+	// -- CONSTRUCTOR --
 	Animation(sf::Sprite &_sfSprite, sf::Texture &_sfTexture, float fTime, int _nFrameWidth, int _nFrameHeight, int _nStartingFramePosX, int _nStartingFramePosY, int _nFinalFramePosX, int _nFinalFramePosY);
+
+	// Functions
 	void play(const float &fElapsedTime);
+	void restart();
 };

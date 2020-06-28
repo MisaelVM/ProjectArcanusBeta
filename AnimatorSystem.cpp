@@ -3,7 +3,9 @@
 // -- CONSTRUCTOR/DESTRUCTOR --
 AnimatorSystem::AnimatorSystem(sf::Sprite &_sfSprite, sf::Texture &_sfTexture)
 	// Initializing references
-	: sfSprite(_sfSprite), sfTexture(_sfTexture) {}
+	: sfSprite(_sfSprite), sfTexture(_sfTexture) {
+	framePointer = nullptr;
+}
 
 AnimatorSystem::~AnimatorSystem() {
 	for (auto &ref : mAnimations)
@@ -16,5 +18,12 @@ void AnimatorSystem::setNewAnimation(const std::string sAnimationKey, float fFra
 }
 
 void AnimatorSystem::playAnimation(const std::string sAnimationKey, const float &fElapsedTime) {
+	if (!framePointer)
+		framePointer = mAnimations[sAnimationKey];
+
+	if (framePointer != mAnimations[sAnimationKey]) {
+		framePointer->restart();
+		framePointer = mAnimations[sAnimationKey];
+	}
 	mAnimations[sAnimationKey]->play(fElapsedTime);
 }

@@ -25,7 +25,7 @@ Animation::Animation(sf::Sprite &_sfSprite, sf::Texture &_sfTexture, float _fFra
 	sfSprite.setTextureRect(sfFrame); // Sets the starting frame of the Animation Sheet
 }
 
-void Animation::play(const float &fElapsedTime) {
+void Animation::play(const float &fElapsedTime) { // Plays the Animation
 	fFrameChronometer += 100.f * fElapsedTime; // Starts the "Frame chronometer"
 	if (fFrameChronometer >= fFrameTime) {
 		fFrameChronometer = 0.f; // Restarts the "Frame chronometer"
@@ -37,4 +37,9 @@ void Animation::play(const float &fElapsedTime) {
 			sfFrame.left = nStartingFramePosX;						// goes back to the starting frame
 		sfSprite.setTextureRect(sfFrame);	// Updates the Frame that will be used in the Sprite
 	}
+}
+
+void Animation::restart() { // Restarts the Animation
+	fFrameChronometer = fFrameTime;
+	sfFrame.left = nStartingFramePosX;
 }
