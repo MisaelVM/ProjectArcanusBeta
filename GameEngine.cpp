@@ -2,7 +2,7 @@
 GameEngine::GameEngine() { // Class' Constructor - Calls its functions
     camera = new sf::View(sf::FloatRect(0, 0, 800, 600));
     constructWindow();
-    Map = new TileMap(80, 120, "1LEVELEDIT.png"); //El string pasado es la imagen con todas las texturas
+    Map = new TileMap(80, 120, "Resources/1LEVELEDIT.png"); //El string pasado es la imagen con todas las texturas
     mResourceTextures["ARIEL_SHEET"].loadFromFile("Resources/ARIEL_SHEET.png"); // Loads textures
     player = new Player(1000, 1000, mResourceTextures["ARIEL_SHEET"]); // Initializes player
 }
@@ -20,7 +20,7 @@ void GameEngine::constructWindow() { // Constructs game's window and initializes
     int framerateLimit = 0;
     bool verticalSyncEnabled = false;
 
-    std::ifstream windowInitializer("BaseWindow.ini"); // Reads the initialization values from an .ini file
+    std::ifstream windowInitializer("Resources/BaseWindow.ini"); // Reads the initialization values from an .ini file
 
     // So it can initialize its values correctly
     if (windowInitializer.is_open()) {
