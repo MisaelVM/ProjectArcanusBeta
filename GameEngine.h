@@ -14,6 +14,8 @@ class GameEngine
 	Player* player;
 	std::map<std::string, sf::Texture> mResourceTextures; // Textures that will be loaded in the game
 
+	sf::Music sfMusic; // Game Music
+
 	TileMap* Map; // Map that will be displayed
 
 	sf::View *camera;// 

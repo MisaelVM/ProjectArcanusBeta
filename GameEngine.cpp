@@ -5,6 +5,9 @@ GameEngine::GameEngine() { // Class' Constructor - Calls its functions
     Map = new TileMap(80, 120, "Resources/1LEVELEDIT.png"); //El string pasado es la imagen con todas las texturas
     mResourceTextures["ARIEL_SHEET"].loadFromFile("Resources/ARIEL_SHEET.png"); // Loads textures
     player = new Player(1000, 1000, mResourceTextures["ARIEL_SHEET"]); // Initializes player
+    sfMusic.openFromFile("Resources/BackgroundMusic.ogg");
+    sfMusic.play();
+    sfMusic.setVolume(50.f);
 }
 
 GameEngine::~GameEngine() { // Class' Destructor - Clears memory
@@ -50,8 +53,10 @@ void GameEngine::start() { // Starts/Launches the game
 
 void GameEngine::updateEvents() {
     while (sfWindow->pollEvent(sfEvent)) { // Handles SFML's events
-        if (sfEvent.type == sf::Event::Closed) 
+        if (sfEvent.type == sf::Event::Closed) {
+            sfMusic.stop();
             sfWindow->close();
+        }
         if (sfEvent.type == sf::Event::MouseWheelMoved)
         {
             camera->zoom(1.f + sfEvent.mouseWheel.delta * 0.1f);

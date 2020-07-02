@@ -1,6 +1,9 @@
 #include "Player.h"
 #include <iostream>
 Player::Player(const float x, const float y, sf::Texture& sfTexture) {
+	vfVelocitySense = sf::Vector2f(1.f, 0.f);
+	viLastSense = sf::Vector2i(1, 0);
+
 	setPosition(x, y);
 
 	// Constructs the animator
