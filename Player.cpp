@@ -1,14 +1,12 @@
 #include "Player.h"
-
-Player::Player(const float x, const float y, sf::Texture &sfTexture) {
-	vfVelocitySense = sf::Vector2f(1.f, 0.f);
-	viLastSense = sf::Vector2i(1, 0);
-
+#include <iostream>
+Player::Player(const float x, const float y, sf::Texture& sfTexture) {
 	setPosition(x, y);
 
 	// Constructs the animator
 	constructAnimatorSystem(sfTexture);
 	// Setting the animations
+	animatorSystem->setNewAnimation("WALKING_RIGHT", 10.f, 35, 35, 0, 4, 5, 4);
 	animatorSystem->setNewAnimation("IDLE_RIGHT", 10.f, 35, 35, 0, 0, 0, 0);
 	animatorSystem->setNewAnimation("IDLE_LEFT", 10.f, 35, 35, 0, 1, 0, 1);
 	animatorSystem->setNewAnimation("IDLE_UP", 10.f, 35, 35, 0, 2, 0, 2);
@@ -17,10 +15,12 @@ Player::Player(const float x, const float y, sf::Texture &sfTexture) {
 	animatorSystem->setNewAnimation("WALKING_LEFT", 10.f, 35, 35, 0, 5, 5, 5);
 	animatorSystem->setNewAnimation("WALKING_UP", 10.f, 35, 35, 0, 6, 5, 6);
 	animatorSystem->setNewAnimation("WALKING_DOWN", 10.f, 35, 35, 0, 7, 5, 7);
+
 }
 
-// Main Functions
-void Player::update(const float &fElapsedTime) {
+//Main functions
+
+void Player::update(const float& fElapsedTime) {
 	vfVelocitySense.x = 0.f; vfVelocitySense.y = 0.f;
 
 	// Checks what keys are being pressed so it can move our Entity
@@ -53,8 +53,16 @@ void Player::update(const float &fElapsedTime) {
 
 	// Moves the Entity
 	move(vfVelocitySense.x, vfVelocitySense.y, fElapsedTime);
+	sf::Vector2f thisposition = hitbox.getPosition();
+	this->setPosition(thisposition.x - 17.5f, thisposition.y - 15.5f);
+	
+	//move(vfVelocitySense.x, vfVelocitySense.y, fElapsedTime);
+	//sf::Vector2f thisposition = hitbox.getPosition();
+	//this->setPosition(thisposition.x - 17.5f, thisposition.y - 15.5f);
 }
-
-void Player::draw(sf::RenderTarget *sfTarget) { // Draws our Entity
+void Player::draw(sf::RenderTarget* sfTarget) { // Draws our Entity
 	sfTarget->draw(sfSprite);
+}
+sf::Vector2f Player::GetHitboxPosition() {
+	return hitbox.getPosition();
 }
