@@ -1,27 +1,26 @@
 #pragma once
-#include "Player.h"
-#include "SFML/Graphics.hpp"
-#include<iostream>
-#include "TileMap.h"
-class GameEngine
-{
-	sf::RenderWindow* sfWindow;
+
+#include "GameState.h"
+
+class GameEngine {
+private:
+	sf::RenderWindow *sfWindow;
 	sf::Event sfEvent;
 
 	sf::Clock sfElapsedTimeClock;
 	float fElapsedTime; // aka Delta Time
 
-	Player* player;
-	std::map<std::string, sf::Texture> mResourceTextures; // Textures that will be loaded in the game
+	GameState *gameState;
 
-	sf::Music sfMusic; // Game Music
-
-	TileMap* Map; // Map that will be displayed
-
-	sf::View *camera;// 
+	std::map<std::string, sf::Keyboard::Key> mGameInput;
 
 	// Constructor's functions
 	void constructWindow();
+	void constructInput();
+
+	// Private Functions
+	void editWindow();
+	void editInput();
 
 public:
 	// -- CONSTRUCTOR/DESTRUCTOR --
@@ -31,9 +30,8 @@ public:
 	// Main Functions
 	void start();
 	void updateEvents();
-	void update();
-	void checkcamera();
-	void draw();
 	void updateElapsedTime();
+	void checkUserInput();
+	void update();
+	void draw();
 };
-

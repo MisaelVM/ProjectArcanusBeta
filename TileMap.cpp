@@ -1,13 +1,12 @@
 #include "TileMap.h"
-TileMap::TileMap(int rows, int columns, std::string archive)
-{
+
+TileMap::TileMap(int rows, int columns, std::string archive, const char *tilemapArchive) {
 	//Leer un archivo
 	char aux; //esto me servira para leer el archivo para poder sacar los char del archivo
-	FILE** TilemapArchive; //Doble puntero porque VS no me deja abrirlo si no es con la funcion fopen_s(abrir de forma segura) que recibe como argumento un puntero a puntero
-	TilemapArchive = new  FILE*;
-	fopen_s(TilemapArchive, "Resources/Tilemap1.ini", "r");
-	if (TilemapArchive == NULL)
-	{
+	FILE **TilemapArchive; //Doble puntero porque VS no me deja abrirlo si no es con la funcion fopen_s(abrir de forma segura) que recibe como argumento un puntero a puntero
+	TilemapArchive = new FILE*;
+	fopen_s(TilemapArchive, tilemapArchive, "r");
+	if (TilemapArchive == NULL) {
 		std::cout << "Archivo no encontrado";
 		exit(1);
 	}
@@ -16,24 +15,21 @@ TileMap::TileMap(int rows, int columns, std::string archive)
 	sizeoftile = 35;
 	image = new sf::Texture;
 	image->loadFromFile(archive);
-	hitbox = new sf::RectangleShape();
-	hitbox->setSize(sf::Vector2f(35.0f, 35.0f));
-	hitbox->setOrigin(hitbox->getSize() / 2.0f);
+	// hitbox = new sf::RectangleShape();
+	// hitbox->setSize(sf::Vector2f(35.0f, 35.0f));
+	// hitbox->setOrigin(hitbox->getSize() / 2.0f);
 	Tile = new sf::Sprite;
 	Mtile = new char* [this->rows];
 	for (int i = 0;i < this->rows;i++)
-	{
 		Mtile[i] = new char[this->columns];
-	}
-	for (int i = 0;i < this->rows;i++)
-	{
-		for (int j = 0;j < this->columns;j++)
-		{
+
+	for (int i = 0; i < this->rows; i++) {
+		for (int j = 0; j < this->columns; j++) {
 			aux = fgetc(*TilemapArchive);
-			if ( aux!=' ' && aux!='\n')
+			if (aux != ' ' && aux != '\n')
 				Mtile[i][j] = aux;
 			else
-				Mtile[i][j]=fgetc(*TilemapArchive);
+				Mtile[i][j] = fgetc(*TilemapArchive);
 		}
 	}
 	fclose(*TilemapArchive);
@@ -239,6 +235,7 @@ TileMap::TileMap(int rows, int columns, std::string archive)
 		}
 	}
 }
+
 TileMap::TileMap() {
 	rows = 0;
 	columns = 0;
@@ -246,17 +243,23 @@ TileMap::TileMap() {
 	image = new sf::Texture;
 	image->loadFromFile("Texturadefault.jpg");
 	Tile = new sf::Sprite;
-	hitbox = new sf::RectangleShape();
+	// hitbox = new sf::RectangleShape();
 	Mtile = new char* [1];
 	for (int i = 0;i < 1;i++)
-	{
 		Mtile[i] = new char[1];
-	}
 }
-sf::Sprite TileMap::GetTile(int row,int column) 
-{
-	switch (*(*(Mtile+row)+column)) 
-	{
+
+TileMap::~TileMap() {
+	delete image;
+	delete Tile;
+
+	for (int i = 0; i < rows; i++)
+		delete[] Mtile[i];
+	delete[] Mtile;
+}
+
+sf::Sprite TileMap::GetTile(int row,int column) {
+	switch (*(*(Mtile+row)+column)) {
 		case 'a':
 			*Tile = ArrayTile["an_casa1"];
 			Tile->setPosition(sizeoftile * column, sizeoftile * row);
@@ -536,22 +539,20 @@ sf::Sprite TileMap::GetTile(int row,int column)
 	}
 	return *Tile;
 }
-void TileMap::Displaytilemap(sf::RenderWindow *window,sf::Vector2f viewposition ) 
-{
+
+void TileMap::Displaytilemap(sf::RenderWindow *window,sf::Vector2f viewposition) {
 	//window->draw(*hitbox);
-	for (int i =ceil (viewposition.y / sizeoftile)-10;i < ceil(viewposition.y / sizeoftile)+10;i++)
-	{
-		for (int j = ceil(viewposition.x / sizeoftile)-13;j < ceil(viewposition.x / sizeoftile)+12;j++)
-		{
+	for (int i = ceil(viewposition.y / sizeoftile) - 10; i < ceil(viewposition.y / sizeoftile) + 10; i++)
+		for (int j = ceil(viewposition.x / sizeoftile) - 13; j < ceil(viewposition.x / sizeoftile) + 12; j++)
 			window->draw(this->GetTile(i, j));
-		}
-	}
-	window->draw(*hitbox);
+	// window->draw(*hitbox);
 }
+
 char TileMap::GetChar(int rows, int colums) {
 	return *(*(Mtile + rows) + colums);
 }
-sf::RectangleShape TileMap::GetCaja(sf::Vector2f hitboxposition) {
+
+/*sf::RectangleShape TileMap::GetCaja(sf::Vector2f hitboxposition) {
 	int row=ceil((hitboxposition.y-17.5f)/35);
 	int colum=ceil((hitboxposition.x-17.5f)/35);
 	if (GetChar(row, colum) == '"') {
@@ -576,4 +577,4 @@ sf::RectangleShape TileMap::GetCaja(sf::Vector2f hitboxposition) {
 		hitbox->setPosition(- 17.5f, - 17.5f);
 	}
 	return *hitbox;
-}
+}*/

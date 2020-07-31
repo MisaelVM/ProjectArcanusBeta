@@ -1,17 +1,12 @@
 #include "GameEngine.h"
 GameEngine::GameEngine() { // Class' Constructor - Calls its functions
-    camera = new sf::View(sf::FloatRect(0, 0, 800, 600));
     constructWindow();
-    Map = new TileMap(80, 120, "Resources/1LEVELEDIT.png"); //El string pasado es la imagen con todas las texturas
-    mResourceTextures["ARIEL_SHEET"].loadFromFile("Resources/ARIEL_SHEET.png"); // Loads textures
-    player = new Player(1000, 1000, mResourceTextures["ARIEL_SHEET"]); // Initializes player
-    sfMusic.openFromFile("Resources/BackgroundMusic.ogg");
-    sfMusic.play();
-    sfMusic.setVolume(50.f);
+    constructInput();
+    gameState = new GameState();
 }
 
 GameEngine::~GameEngine() { // Class' Destructor - Clears memory
-    delete player;
+    delete gameState;
     delete sfWindow;
 }
 
@@ -43,10 +38,101 @@ void GameEngine::constructWindow() { // Constructs game's window and initializes
     sfWindow->setVerticalSyncEnabled(verticalSyncEnabled);
 }
 
+void GameEngine::constructInput() {
+    std::string stream;
+
+    std::ifstream inputInitializer("Resources/BaseInput.ini");
+
+    inputInitializer.ignore(32, ']');
+    while (inputInitializer >> stream) {
+        int pos = stream.find("=");
+        std::string keyBind = stream.substr(0, pos);
+        stream.erase(0, pos + 1);
+        char key;
+        if (stream == "Escape")
+            key = 36;
+        else {
+            std::stringstream parse(stream);
+            parse >> key;
+            key -= 65;
+        }
+        mGameInput[keyBind] = sf::Keyboard::Key(key);
+    }
+    inputInitializer.close();
+}
+
+// Private Functions
+void GameEngine::editWindow() {
+    int input;
+
+    // Config variables
+    std::string resolution;
+    std::string framerateLimit;
+    std::string verticalSync;
+
+    // Window resolution
+    std::string window_resolutions[] =
+    { "640 480", "800 600", "960 720", "1280 720", "1366 768", "1600 900", "1920 1080", "2560 1440", "3840 2160" };
+
+    std::cout << "Choose resolution:\n";
+    for (int i = 0; i < 9; i++)
+        std::cout << i + 1 << ") " << window_resolutions[i] << "\n";
+    std::cin >> input;
+    resolution = window_resolutions[input - 1];
+
+    // Framerate Limit
+    std::string framerate_limits[] =
+    { "30", "40", "50", "60", "100", "120", "144", "0" };
+    std::cout << "Choose framerate limit:\n";
+    for (int i = 0; i < 8 - 1; i++)
+        std::cout << i + 1 << ") " << framerate_limits[i] << "\n";
+    std::cout << "8) Unlimited\n";
+    std::cin >> input;
+    framerateLimit = framerate_limits[input - 1];
+
+    // Vertical sync
+    std::cout << "Enable Vertical Sync?:\n";
+    std::cin >> input;
+    input ? verticalSync = "1" : verticalSync = "0";
+
+    // Saves configuration
+    std::ofstream newConfiguration("Resources/BaseWindow.ini", std::ofstream::trunc);
+    if (newConfiguration.is_open()) {
+        newConfiguration << "[GameEngine.sfWindow]\n";
+        newConfiguration << "windowTitle=TheHolyQuest\n";
+        newConfiguration << "windowSize=" << resolution << "\n";
+        newConfiguration << "framerateLimit=" << framerateLimit << "\n";
+        newConfiguration << "verticalSyncEnabled=" << verticalSync << "\n";
+    }
+    newConfiguration.close();
+}
+
+void GameEngine::editInput() {
+    std::string escape;
+    std::string move_up;
+    std::string move_down;
+    std::string move_left;
+    std::string move_right;
+
+    std::cin >> escape >> move_up >> move_down >> move_left >> move_right;
+
+    std::ofstream newInputConfiguration("Resources/BaseInput.ini", std::ofstream::trunc);
+    if (newInputConfiguration.is_open()) {
+        newInputConfiguration << "[GameEngine.gameInput]\n";
+        newInputConfiguration << "ESCAPE=" << escape << "\n";
+        newInputConfiguration << "MOVE_UP=" << move_up << "\n";
+        newInputConfiguration << "MOVE_DOWN=" << move_down << "\n";
+        newInputConfiguration << "MOVE_LEFT=" << move_left << "\n";
+        newInputConfiguration << "MOVE_RIGHT=" << move_right << "\n";
+    }
+    newInputConfiguration.close();
+    constructInput();
+}
+
 // Main Functions - for handling our game
 void GameEngine::start() { // Starts/Launches the game
     while (sfWindow->isOpen()) { // Game Loop
-        update(); // Always updating the window
+        update(); // Always updating the data
         draw(); // Always drawing items
     }
 }
@@ -57,58 +143,25 @@ void GameEngine::updateEvents() {
             sfMusic.stop();
             sfWindow->close();
         }
-        if (sfEvent.type == sf::Event::MouseWheelMoved)
+        /*if (sfEvent.type == sf::Event::MouseWheelMoved)
         {
             camera->zoom(1.f + sfEvent.mouseWheel.delta * 0.1f);
-        }
+        }*/
     }
 }
 
 void GameEngine::update() { // Updates data in general
     updateElapsedTime(); // Always updating the Elapsed Time
     updateEvents();
-    player->update(fElapsedTime); // Control/Movement
-    checkcamera();// Set of camera position by the player position
-    Collider* hitboxplayer = new Collider(player->GetCollider());
-    Map->GetCollider(player->GetHitboxPosition()).Checkcollision(*hitboxplayer, 1.0f);
-    delete hitboxplayer;
+    checkUserInput();
+    gameState->update(fElapsedTime);
 }
-void GameEngine::checkcamera() {
-    if (ceil(player->GetPosition().x/35) <= 12 && ceil(player->GetPosition().y/35)<=10) {
-        camera->setCenter(sf::Vector2f(400.0f, 335.0f));
-    }
-    else if (ceil(player->GetPosition().x / 35) >= 109 && ceil(player->GetPosition().y / 35) >= 70) {
-        camera->setCenter(sf::Vector2f(3800.0f, 2430.0f));
-    }
-    else if (ceil(player->GetPosition().x / 35) >= 109 && ceil(player->GetPosition().y / 35) <= 10) {
-        camera->setCenter(sf::Vector2f(3800.0f, 335.0f));
-    }
-    else if (ceil(player->GetPosition().x / 35) <= 109 && ceil(player->GetPosition().y / 35) >= 70) {
-        camera->setCenter(sf::Vector2f(400.0f, 2430.0f));
-    }
-    else if (ceil(player->GetPosition().x / 35) >= 109) {
-        camera->setCenter(sf::Vector2f(3800.0f, player->GetPosition().y));
-    }
-    else if (ceil(player->GetPosition().y / 35) >= 70) {
-        camera->setCenter(sf::Vector2f(player->GetPosition().x,2430.0f));
-    }
-    else if (ceil(player->GetPosition().x / 35) <= 12) {
-        camera->setCenter(sf::Vector2f(400.0f,player->GetPosition().y));
-    }
-    else if (ceil(player->GetPosition().y / 35) <= 10) {
-        camera->setCenter(sf::Vector2f(player->GetPosition().x, 335.0f));
-    }
-    else {
-        camera->setCenter(player->GetPosition());
-    }
-}
+
 void GameEngine::draw() { // Draws Items 
     sfWindow->clear();
     
     //camera->setCenter(player->GetPosition());
-    Map->Displaytilemap(sfWindow,camera->getCenter());
-    player->draw(sfWindow);
-    sfWindow->setView(*camera);
+    gameState->draw(sfWindow);
     sfWindow->display();
    
 }
@@ -117,6 +170,20 @@ void GameEngine::updateElapsedTime() { // Updates the value of the Elapsed Time
     fElapsedTime = sfElapsedTimeClock.restart().asSeconds();
     system("cls");
     std::cout << fElapsedTime << " --- " << 1 / fElapsedTime << " FPS\n"; // This way we'll test how the FPS are doing
-    std::cout << ceil(player->GetPosition().x/35) << " " <<ceil( player->GetPosition().y/35)<<"\n";
-    std::cout<<ceil(camera->getCenter().x/35)<<" "<<ceil(camera->getCenter().y/35)-10;
+    // std::cout << ceil(player->GetPosition().x/35) << " " <<ceil( player->GetPosition().y/35)<<"\n";
+    // std::cout<<ceil(camera->getCenter().x/35)<<" "<<ceil(camera->getCenter().y/35)-10;
+}
+
+void GameEngine::checkUserInput() {
+    bool playerInput[4] = { false, false, false, false };
+
+    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_LEFT"])) playerInput[0] = true;
+    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_RIGHT"])) playerInput[1] = true;
+    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_UP"])) playerInput[2] = true;
+    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_DOWN"])) playerInput[3] = true;
+    // // player->setPlayerInput(playerHotkeys);
+    gameState->getInput(playerInput, fElapsedTime);
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) { editWindow(); }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) { editInput(); }
 }

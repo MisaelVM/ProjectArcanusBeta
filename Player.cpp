@@ -1,8 +1,16 @@
 #include "Player.h"
-#include <iostream>
+
 Player::Player(const float x, const float y, sf::Texture& sfTexture) {
 	vfVelocitySense = sf::Vector2f(1.f, 0.f);
 	viLastSense = sf::Vector2i(1, 0);
+
+	input[0] = false;
+	input[1] = false;
+	input[2] = false;
+	input[3] = false;
+
+	hitbox.setPosition(x + 8.f, y);
+	hitbox.setSize(sf::Vector2f(20.f, 35.f));
 
 	setPosition(x, y);
 
@@ -24,13 +32,13 @@ Player::Player(const float x, const float y, sf::Texture& sfTexture) {
 //Main functions
 
 void Player::update(const float& fElapsedTime) {
-	vfVelocitySense.x = 0.f; vfVelocitySense.y = 0.f;
+	/*vfVelocitySense.x = 0.f; vfVelocitySense.y = 0.f;
 
 	// Checks what keys are being pressed so it can move our Entity
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) { vfVelocitySense.x = -1.f; viLastSense.x = -1; viLastSense.y = 0; }
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) { vfVelocitySense.x = 1.f; viLastSense.x = 1; viLastSense.y = 0; }
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { vfVelocitySense.y = -1.f; viLastSense.x = 0; viLastSense.y = -1; }
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) { vfVelocitySense.y = 1.f; viLastSense.x = 0; viLastSense.y = 1; }
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) { vfVelocitySense.y = 1.f; viLastSense.x = 0; viLastSense.y = 1; }*/
 
 	// Plays the animation
 	if (vfVelocitySense.x == 0.f && vfVelocitySense.y == 0.f) {
@@ -56,16 +64,30 @@ void Player::update(const float& fElapsedTime) {
 
 	// Moves the Entity
 	move(vfVelocitySense.x, vfVelocitySense.y, fElapsedTime);
-	sf::Vector2f thisposition = hitbox.getPosition();
-	this->setPosition(thisposition.x - 17.5f, thisposition.y - 15.5f);
+	// sf::Vector2f thisposition = hitbox.getPosition();
+	// this->setPosition(thisposition.x - 17.5f, thisposition.y - 15.5f);
 	
 	//move(vfVelocitySense.x, vfVelocitySense.y, fElapsedTime);
 	//sf::Vector2f thisposition = hitbox.getPosition();
 	//this->setPosition(thisposition.x - 17.5f, thisposition.y - 15.5f);
 }
-void Player::draw(sf::RenderTarget* sfTarget) { // Draws our Entity
+void Player::draw(sf::RenderTarget *sfTarget) { // Draws our Entity
 	sfTarget->draw(sfSprite);
 }
-sf::Vector2f Player::GetHitboxPosition() {
-	return hitbox.getPosition();
+
+void Player::setPlayerInput(const sf::Vector2f& velocity, const sf::Vector2i& last) {
+	vfVelocitySense = velocity;
+	viLastSense = last;
 }
+
+sf::Vector2f Player::getVelocitySense() const {
+	return vfVelocitySense;
+}
+
+sf::Vector2i Player::getLastSense() const {
+	return viLastSense;
+}
+
+/*sf::Vector2f Player::GetHitboxPosition() {
+	return hitbox.getPosition();
+}*/

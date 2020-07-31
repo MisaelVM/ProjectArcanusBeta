@@ -25,5 +25,5 @@ void AnimatorSystem::playAnimation(const std::string sAnimationKey, const float 
 		framePointer->restart();
 		framePointer = mAnimations[sAnimationKey];
 	}
-	mAnimations[sAnimationKey]->play(fElapsedTime);
+	framePointer->play(fElapsedTime);
 }
