@@ -140,7 +140,6 @@ void GameEngine::start() { // Starts/Launches the game
 void GameEngine::updateEvents() {
     while (sfWindow->pollEvent(sfEvent)) { // Handles SFML's events
         if (sfEvent.type == sf::Event::Closed) {
-            sfMusic.stop();
             sfWindow->close();
         }
         /*if (sfEvent.type == sf::Event::MouseWheelMoved)

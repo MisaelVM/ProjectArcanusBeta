@@ -540,7 +540,7 @@ sf::Sprite TileMap::GetTile(int row,int column) {
 	return *Tile;
 }
 
-void TileMap::Displaytilemap(sf::RenderWindow *window,sf::Vector2f viewposition) {
+void TileMap::Displaytilemap(sf::RenderTarget *window,sf::Vector2f viewposition) {
 	//window->draw(*hitbox);
 	for (int i = ceil(viewposition.y / sizeoftile) - 10; i < ceil(viewposition.y / sizeoftile) + 10; i++)
 		for (int j = ceil(viewposition.x / sizeoftile) - 13; j < ceil(viewposition.x / sizeoftile) + 12; j++)

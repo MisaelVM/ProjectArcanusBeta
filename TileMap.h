@@ -31,7 +31,7 @@ public:
 	TileMap(int rows, int columns, std::string archive, const char *tilemapArchive);
 	virtual ~TileMap();
 
-	void Displaytilemap(sf::RenderWindow *window, sf::Vector2f viewposition);
+	void Displaytilemap(sf::RenderTarget *window, sf::Vector2f viewposition);
 
 	sf::Sprite GetTile(int rows, int columns);
 	char GetChar(int rows, int colums);
