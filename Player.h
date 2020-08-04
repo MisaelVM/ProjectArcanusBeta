@@ -9,12 +9,25 @@ private:
 
 	bool input[4];
 
+	// -- CONSTRUCTOR -- SINGLETON PATTERN --
+	Player() {};
+
+	// -- INSTANCE -- SINGLETON PATTERN --
+	static Player *player_instance;
+
 public:
-	// -- CONSTRUCTOR --
-	Player(const float x, const float y, sf::Texture &sfTexture);
+	// -- INSTANCE GETTER -- SINGLETON PATTERN --
+	static Player *getInstance();
+
+	// -- DELETED COPY CONSTRUCTOR AND ASSIGNMENT OPERATOR -- SINGLETON PATTERN --
+	Player(const Player &o) = delete;
+	Player &operator = (const Player &o) = delete;	
 
 	// Functions
+	void refresh(const float x, const float y, sf::Texture& sfTexture);
+
 	void setPlayerInput(const sf::Vector2f &velocity, const sf::Vector2i &last);
+	void setVelocity(const float x, const float y);
 
 	sf::Vector2f getVelocitySense() const;
 	sf::Vector2i getLastSense() const;

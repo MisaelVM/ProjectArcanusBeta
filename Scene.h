@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Cutscene.h"
 #include "Player.h"
 #include "TileMap.h"
 
@@ -9,12 +10,17 @@ protected:
 
 	std::map<std::string, sf::Texture> mSceneResourceTextures; // Textures that will be loaded in the scene
 
+	bool bEnabledInput;
+
 	bool bSceneEnd;
+
 	std::string sNextScene;
 
 public:
 	// -- CONSTRUCTOR --
 	Scene();
+
+	const bool checkEnabledInput() const;
 
 	virtual char getCollision(const float x, const float y) = 0;
 	virtual const bool checkCollision(const char &tile) const = 0;
@@ -28,5 +34,6 @@ public:
 
 	virtual void update(const float &fElapsedTime) = 0;
 	virtual void awake() = 0;
+	virtual void end() = 0;
 	virtual void draw(sf::RenderTarget *sfTarget) = 0;
 };

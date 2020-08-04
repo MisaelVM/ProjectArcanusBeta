@@ -1,16 +1,24 @@
 #pragma once
 
 #include "Scene.h"
+#include "DialogDisplayer.h"
 
 class LevelScene : public Scene {
 private:
+	float startingPosX;
+	float startingPosY;
+
 	Player *player;
 
 	TileMap *sceneMap;
 
 	sf::View *camera;
 
+	Cutscene cutscene;
+	DialogDisplayer *dialogDisplayer;
+
 	sf::Music &sfMusic; // Game Music
+
 
 public:
 	LevelScene(const std::string _sSceneName, const std::string _sNextScene, // Level Name
@@ -32,6 +40,7 @@ public:
 
 	void update(const float &fElapsedTime);
 	void awake();
+	void end();
 	void draw(sf::RenderTarget *sfTarget);
 };
 

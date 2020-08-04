@@ -174,15 +174,22 @@ void GameEngine::updateElapsedTime() { // Updates the value of the Elapsed Time
 }
 
 void GameEngine::checkUserInput() {
-    bool playerInput[4] = { false, false, false, false };
+    if (sfWindow->hasFocus()) {
+        bool playerInput[4] = { false, false, false, false };
 
-    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_LEFT"])) playerInput[0] = true;
-    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_RIGHT"])) playerInput[1] = true;
-    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_UP"])) playerInput[2] = true;
-    if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_DOWN"])) playerInput[3] = true;
-    // // player->setPlayerInput(playerHotkeys);
-    gameState->getInput(playerInput, fElapsedTime);
+        if (gameState->checkSceneInput()) {
+            if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_LEFT"])) playerInput[0] = true;
+            if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_RIGHT"])) playerInput[1] = true;
+            if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_UP"])) playerInput[2] = true;
+            if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_DOWN"])) playerInput[3] = true;
+            // // player->setPlayerInput(playerHotkeys);
+            gameState->getInput(playerInput, fElapsedTime);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) { editWindow(); }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) { editInput(); }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) { editWindow(); }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) { editInput(); }
+        }
+
+        if (sf::Keyboard::isKeyPressed(mGameInput["ESCAPE"]))
+            gameState->changeScene("PAUSE_MENU");
+    }
 }

@@ -19,6 +19,8 @@ protected:
 	// Variables
 	float fMovementSpeed;
 
+	bool bInCinematic;
+
 	// Constructor's functions
 	void constructSprite(sf::Texture *_sfTexture); // Constructs the Sprite using the Texture
 	void constructAnimatorSystem(sf::Texture &sfTextureSheet); // Constructs the Animator
@@ -43,6 +45,7 @@ public:
 	float getMovementSpeed() const;
 
 	virtual void move(const float towardsX, const float towardsY, const float &fElapsedTime); // Moves our Entity
+	virtual void setVelocity(const float x, const float y) = 0;
 
 	// Main Functions
 	virtual void update(const float &fElapsedTime) = 0; // Updates our Entity's data

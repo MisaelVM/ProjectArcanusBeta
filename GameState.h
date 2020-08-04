@@ -15,10 +15,12 @@ public:
 	// -- CONSTRUCTOR/DESTRUCTOR --
 	GameState();
 	virtual ~GameState();
-
+	
 	// Functions
 	void getInput(bool input[4], const float& fElapsedTime);
 	void changeScene(std::string sName);
+
+	const bool checkSceneInput() const;
 
 	// Main functions
 	void update(const float &fElapsedTime);

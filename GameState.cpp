@@ -36,16 +36,19 @@ void GameState::getInput(bool input[4], const float &fElapsedTime) {
 }
 
 void GameState::changeScene(std::string sName) {
-    if (currentScene->getEnd()) {
-        //currentScene->terminate();
-        currentScene = mGameScenes[sName];
-        currentScene->awake();
-    }
+    currentScene->end();
+    currentScene = mGameScenes[sName];
+    currentScene->awake();
+}
+
+const bool GameState::checkSceneInput() const {
+    return currentScene->checkEnabledInput();
 }
 
 // Main functions
 void GameState::update(const float &fElapsedTime) {
-    changeScene(currentScene->getNextScene());
+    if (currentScene->getEnd())
+        changeScene(currentScene->getNextScene());
     currentScene->update(fElapsedTime);
 }
 

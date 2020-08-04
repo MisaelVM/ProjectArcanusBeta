@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de encabezado\Cutscene">
+      <UniqueIdentifier>{53fc4b16-dec5-4b2c-87f9-f3986e33b827}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -51,6 +54,21 @@
     <ClCompile Include="MenuScene.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="Cutscene.cpp">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogDisplayer.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveCommand.cpp">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogCommand.cpp">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameEngine.h">
@@ -85,6 +103,21 @@
     </ClInclude>
     <ClInclude Include="MenuScene.h">
       <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Cutscene.h">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogDisplayer.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveCommand.h">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogCommand.h">
+      <Filter>Archivos de encabezado\Cutscene</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

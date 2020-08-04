@@ -18,7 +18,11 @@ LevelScene::LevelScene(const std::string _sSceneName, const std::string _sNextSc
 
 	sceneMap = new TileMap(rows, columns, textureArchive, tilemapArchive);
 
-	player = new Player(playerPosX, playerPosY, mSceneResourceTextures[playerTexture]);
+	startingPosX = playerPosX;
+	startingPosY = playerPosY;
+
+	player = Player::getInstance();
+	player->refresh(playerPosX, playerPosY, mSceneResourceTextures[playerTexture]);
 }
 
 LevelScene::~LevelScene() {
