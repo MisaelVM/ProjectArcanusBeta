@@ -56,14 +56,14 @@ void Player::update(const float& fElapsedTime) {
 		else if (viLastSense.y == -1) animatorSystem->playAnimation("IDLE_UP", fElapsedTime);
 	}
 	else {
-		if (vfVelocitySense.x == 1.f)
+		if (vfVelocitySense.x > 0)
 			animatorSystem->playAnimation("WALKING_RIGHT", fElapsedTime);
-		else if (vfVelocitySense.x == -1.f)
+		else if (vfVelocitySense.x < 0)
 			animatorSystem->playAnimation("WALKING_LEFT", fElapsedTime);
 		else {
-			if (vfVelocitySense.y == -1.f)
+			if (vfVelocitySense.y < 0)
 				animatorSystem->playAnimation("WALKING_UP", fElapsedTime);
-			else if (vfVelocitySense.y == 1.f)
+			else if (vfVelocitySense.y > 0)
 				animatorSystem->playAnimation("WALKING_DOWN", fElapsedTime);
 		}
 	}
