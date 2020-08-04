@@ -7,6 +7,61 @@
 #include <time.h>
 namespace rpg
 {
+    class state
+    {
+        std::string name;
+        int stat_affect;
+        int power;
+        int turn;
+    public:
+        state();
+
+        void set_state(std::string, int, int, int);
+        void set_turn();
+        void show_data();
+        friend class stats;
+        friend class equipment;
+        friend class ability;
+        friend class character;
+        friend class enemy;
+        friend class consumible;
+    };
+
+    state::state()
+    {
+        name = "normal";
+        stat_affect = 0;
+        power = 0;
+        turn = 0;
+    }
+
+
+    void state::set_state(std::string name, int stat_effect, int power, int turn)
+    {
+        this->name = name;
+        this->stat_affect = stat_effect;
+        this->power = power;
+        this->turn = turn;
+    }
+
+    void state::set_turn()
+    {
+        if (turn > 0)
+            turn--;
+        if (turn == 0)
+        {
+            name = "normal";
+            stat_affect = 0;
+            power = 0;
+        }
+    }
+    void state::show_data()
+    {
+        std::cout << "State:   \n\n name:" << name << "\n";
+        std::cout << "power: " << power << "\n";
+        std::cout << "turn: " << turn << "\n";
+    }
+
     class table_element
     {
         std::string* element_list;
@@ -21,11 +76,13 @@ namespace rpg
         ~table_element();
     };
 
+
     class stats
     {
         std::string* stadistic_name;
         int* value;
         int _size;
+        state* _state;
     public:
         stats();
         stats(std::string[], int[], int);
@@ -38,8 +95,13 @@ namespace rpg
         void set_name(std::string[]);
         void sum_value(int, int);
         void show_data();
+        void set_state(std::string, int, int, int);
+        void pass_turn();
+        void remove_state(std::string);
+        void show_state();
         ~stats();
         friend class character;
+        friend class enemy;
     };
     class level
     {
@@ -69,7 +131,9 @@ namespace rpg
     class ability
     {
         std::string name;
-        std::string state;
+        //std::string state;
+        state _state;
+        bool phisical_magical;
         int power;
         std::string element;
         std::string state_name;
@@ -77,9 +141,10 @@ namespace rpg
     public:
         ability();
         ability(ability&);
-        ability(std::string, std::string, int, table_element&, int, std::string, int);
+        ability(std::string, int, table_element&, int, std::string, int, std::string, int, int, int, bool);
         std::string get_name();
-        std::string get_state();
+        //std::string get_state();
+        bool get_phisical_magical();
         void modify_abilities(ability&);
         int get_power();
         int get_consume();
@@ -87,8 +152,24 @@ namespace rpg
         std::string get_state_name();
         void show_data();
         friend class character;
+        friend class state;
+        friend class enemy;
     };
+    /*
+    class item
+    {
+    protected:
 
+        std::string name;
+        std::string description;
+    public:
+        item();
+        item(std::string, std::string);
+        virtual std::string get_name();
+        virtual std::string get_description();
+        virtual void show_data();
+    };
+    */
     class item
     {
     protected:
@@ -103,6 +184,326 @@ namespace rpg
         virtual void show_data();
     };
 
+    class equipment : public item
+    {
+    protected:
+        int num;
+        std::string* names;
+        int* improve;
+        std::string element;
+        state special;
+    public:
+        equipment();
+        equipment(int, std::string*, int*, std::string, std::string, std::string);
+        equipment(int, std::string*, int*, std::string, std::string, int, int, int, std::string, std::string);
+        std::string get_element();
+        int get_num();
+        state& get_special();
+        void show_data();
+        friend class character;
+    };
+
+    equipment::equipment() : special()
+    {
+        num = 0;
+        names = nullptr;
+        improve = nullptr;
+        element = "empty";
+    }
+    equipment::equipment(int num, std::string* stats, int* improvement, std::string element, std::string name, std::string description) : special(), item(name, description)
+    {
+        this->num = num;
+        this->element = element;
+        names = new std::string[num];
+        improve = new int[num];
+        for (int i = 0; i < num; i++)
+        {
+            names[i] = stats[i];
+            improve[i] = improvement[i];
+        }
+    }
+
+    equipment::equipment(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : special(), item(n, d)
+    {
+        this->num = num;
+        this->element = element;
+        names = new std::string[num];
+        improve = new int[num];
+        for (int i = 0; i < num; i++)
+        {
+            names[i] = stats[i];
+            improve[i] = improvement[i];
+        }
+        special.set_state(state_name, stat_eff, pow, turns);
+    }
+    std::string equipment::get_element()
+    {
+        return element;
+    }
+
+    state& equipment::get_special()
+    {
+        return special;
+    }
+
+    void equipment::show_data()
+    {
+        std::cout << "name: " << name << std::endl;
+        std::cout << "description: " << description << std::endl;
+        std::cout << "improve stats:\n\n";
+        for (int i = 0; i < num; i++)
+            std::cout << names[i] << ": " << improve[i] << "\n";
+        std::cout << "element: " << element << "\n";
+        std::cout << "state: " << special.name;
+    }
+
+    int equipment::get_num()
+    {
+        return num;
+    }
+
+    class costume : public equipment
+    {
+    protected:
+        std::string type;
+        bool equip;
+    public:
+        costume();
+        costume(int, std::string*, int*, std::string, std::string, std::string);
+        costume(int, std::string*, int*, std::string, std::string, int, int, int, std::string, std::string);
+        std::string get_type() { return type; };
+        bool get_equip() { return equip; };
+        void equiped() { equip = true; };
+        void unequiped() { equip = false; };
+        friend class inventory;
+    };
+
+
+    costume::costume() : equipment()
+    {
+        equip = false;
+        type = "null";
+    }
+    costume::costume(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : equipment(num, stats, improvement, element, n, d)
+    {
+        equip = false;
+        type = "null";
+    }
+    costume::costume(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : equipment(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+    {
+        equip = false;
+        type = "null";
+    }
+
+    class head :public costume
+    {
+    public:
+        head() : costume() { type = "head"; };
+        head(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : costume(num, stats, improvement, element, n, d) { type = "head"; };
+        head(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : costume(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "head";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class legs :public costume
+    {
+    public:
+        legs() : costume() { type = "legs"; };
+        legs(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : costume(num, stats, improvement, element, n, d) { type = "legs"; };
+        legs(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : costume(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "legs";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class armor :public costume
+    {
+    public:
+        armor() : costume() { type = "armor"; };
+        armor(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : costume(num, stats, improvement, element, n, d) { type = "armor"; };
+        armor(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : costume(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "armor";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class accesory :public costume
+    {
+    public:
+        accesory() : costume() { type = "accesory"; };
+        accesory(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : costume(num, stats, improvement, element, n, d) { type = "accesory"; };
+        accesory(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : costume(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "accesory";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class weapon : public equipment
+    {
+    protected:
+        std::string type;
+        bool equip;
+    public:
+        weapon();
+        weapon(int, std::string*, int*, std::string, std::string, std::string);
+        weapon(int, std::string*, int*, std::string, std::string, int, int, int, std::string, std::string);
+        std::string get_type() { return type; };
+        bool get_equip() { return equip; };
+        void equiped() { equip = true; };
+        void unequiped() { equip = false; };
+        friend class inventory;
+    };
+
+    weapon::weapon() : equipment()
+    {
+        equip = false;
+        type = "null";
+    }
+    weapon::weapon(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : equipment(num, stats, improvement, element, n, d)
+    {
+        equip = false;
+        type = "null";
+    }
+    weapon::weapon(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : equipment(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+    {
+        equip = false;
+        type = "null";
+    }
+
+    class shield :public weapon
+    {
+    public:
+        shield() : weapon() { type = "head"; };
+        shield(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : weapon(num, stats, improvement, element, n, d) { type = "head"; };
+        shield(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : weapon(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "shield";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class sword :public weapon
+    {
+    public:
+        friend class inventory;
+        sword() : weapon() { type = "sword"; };
+        sword(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : weapon(num, stats, improvement, element, n, d) { type = "sword"; };
+        sword(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : weapon(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "sword";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class spear :public weapon
+    {
+    public:
+        spear() : weapon() { type = "spear"; };
+        spear(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : weapon(num, stats, improvement, element, n, d) { type = "spear"; };
+        spear(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : weapon(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "spear";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class axe :public weapon
+    {
+    public:
+        axe() : weapon() { type = "axe"; };
+        axe(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : weapon(num, stats, improvement, element, n, d) { type = "axe"; };
+        axe(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : weapon(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "axe";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class bow :public weapon
+    {
+    public:
+        bow() : weapon() { type = "bow"; };
+        bow(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : weapon(num, stats, improvement, element, n, d) { type = "bow"; };
+        bow(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : weapon(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "bow";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class crosier :public weapon
+    {
+    public:
+        crosier() : weapon() { type = "crosier"; };
+        crosier(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : weapon(num, stats, improvement, element, n, d) { type = "crosier"; };
+        crosier(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : weapon(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "crosier";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+
+    class knife :public weapon
+    {
+    public:
+        knife() : weapon() { type = "knife"; };
+        knife(int num, std::string* stats, int* improvement, std::string element, std::string n, std::string d) : weapon(num, stats, improvement, element, n, d) { type = "knife"; };
+        knife(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d) : weapon(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d)
+        {
+            type = "knife";
+        }
+        void show()
+        {
+            show_data();
+            std::cout << "\ntype: " << type;
+        }
+    };
+    /*
     class weapon : public item
     {
         std::string weapon_type;
@@ -124,7 +525,11 @@ namespace rpg
         void show_data();
         friend class character;
         ~weapon();
-    };
+    };*/
+
+
+
+    
 
     class role
     {
@@ -154,6 +559,8 @@ namespace rpg
         friend class character;
     };
 
+
+
     class character
     {
         std::string name;
@@ -166,7 +573,8 @@ namespace rpg
         level _level;
         role* roles;
         int* point_role;
-        weapon* equipment;
+        weapon** weapons;
+        costume** costumes;
         int num_of_equip;
         int* constant;
     public:
@@ -181,6 +589,7 @@ namespace rpg
         role get_roles(int);
         weapon get_weapon(int);
         weapon& get_wep_f();
+        costume get_costume(int);
         void get_state_turn(ability&);
         void set_turn_state_minus();
         void rest_mp(int, int);
@@ -193,14 +602,21 @@ namespace rpg
         void redebuff();
 
         void show_act_stats();
-        void equip(int, weapon&);
-        void unequip(int);
+
+        void equip_weapon(int, weapon&);
+        void unequip_weapon(int);
+        void equip_costume(int, costume&);
+        void unequip_costume(int);
+
         void modify_stats_equip_or_level();
-        void modify_stats_buff_debuff();
+        //void modify_stats_buff_debuff();
         void set_experience_entity(float);
         void set_experience_class(float);
 
         void take_damage(int, ability&);
+
+        void damage(int, ability&);
+        void buff_debuff();
 
         void show_equipment();
 
@@ -210,12 +626,14 @@ namespace rpg
         void show_for_elect();
         ~character();
         friend class Combat;
+        friend class consumible;
     };
 
     class enemy
     {
         std::string name;
-        std::string state;
+        //std::string state;
+        //state** _state;
         std::string element;
         std::string code_state;
         int turn_state;
@@ -237,6 +655,8 @@ namespace rpg
         void rest_mp(int);
         void set_name(std::string);
 
+        std::string get_name();
+
         char get_fisical_magical(int);
         void redebuff_();
 
@@ -248,46 +668,18 @@ namespace rpg
         void show_in_combat();
         ~enemy();
         friend class Combat;
+        friend class stats;
+        friend class consumible;
     };
 
-    class Combat {
-    private:
-        int* turn;
-        std::string* n_turn;
-        int combat_size;
-        int position;
-        int players_size;
-        int enemies_size;
-        int num_of_turns;
 
-        bool playerturn;
-        bool escape;
-        bool playerdefeated;
-        bool enemydefeated;
-        std::string* weapon_table;
 
-    public:
-        Combat();
-        Combat(character[], enemy enemies[], int players_team, int enemies_team, std::string[], int, table_element&);
-        virtual ~Combat();
 
-        void put_speed(character players[], enemy enemies[]);
-        void sort_speed();
-        void show_array();
 
-        void actualize_speed(character players[], enemy enemies[]);
 
-        void evaluate_hp(character players[], enemy enemies[]);
 
-        void show_data(character players[], enemy[]);
-        void change_array();
-        void set_state(character players[], enemy[]);
-        void search_turn(character players[], enemy[]);
-        void initCombat(character players[], enemy enemies[], table_element&);
-        void remove(character players[], enemy enemies[], int n);
-        friend class character;
-        friend class enemy;
-    };
+    // para que te guies enemy[i].act_statdistic.get_stat_value(0) es la vida actual del enemigo
+    // y player[i].act_stats.get_stat_value(o) es la vida actual del personaje
 
     table_element::table_element(std::string array_elements[], int sizes)
     {
@@ -373,6 +765,7 @@ namespace rpg
         _size = 0;
         this->stadistic_name = nullptr;
         this->value = nullptr;
+        this->_state = nullptr;
     }
 
     stats::stats(std::string _list[], int _list_value[], int _siz)
@@ -385,6 +778,9 @@ namespace rpg
             this->stadistic_name[i] = _list[i];
             this->value[i] = _list_value[i];
         }
+        this->_state = new state[_size];
+        for (int i = 0; i < _size; i++)
+            _state[i] = state();
     }
 
     stats::stats(const stats& o)
@@ -397,6 +793,9 @@ namespace rpg
             stadistic_name[i] = o.stadistic_name[i];
             value[i] = o.value[i];
         }
+        this->_state = new state[_size];
+        for (int i = 0; i < _size; i++)
+            _state[i] = state();
     }
 
     void stats::set_v_value(int pos, int new_value)
@@ -434,6 +833,35 @@ namespace rpg
     {
         for (int i = 0; i < _size; i++)
             std::cout << "Stat  name: " << stadistic_name[i] << " value: " << value[i] << "\n";
+    }
+    void stats::set_state(std::string name, int stat_effect, int power, int turn)
+    {
+        for (int i = 0; i < _size; i++)
+            if (_state[i].name == "normal") {
+                _state[i].set_state(name, stat_effect, power, turn);
+                break;
+            }
+    }
+    void stats::pass_turn()
+    {
+        for (int i = 0; i < _size; i++)
+            _state[i].set_turn();
+    }
+    void stats::remove_state(std::string nam)
+    {
+        for (int i = 0; i < _size; i++)
+            if (_state[i].name == nam) {
+                std::cout << "recovered for " << _state[i].name << "\n";
+                _state[i].set_state("normal", 0, 0, 0);
+                return;
+            }
+        std::cout << "no effect\n";
+    }
+    void stats::show_state()
+    {
+        for (int i = 0; i < _size; i++)
+            if (_state[i].name != "normal")
+                std::cout << _state[i].name << " " << _state[i].turn << "\n\n";
     }
     stats::~stats()
     {
@@ -521,34 +949,37 @@ namespace rpg
         }
     }
 
-    ability::ability()
+    ability::ability() : _state()
     {
         name = "empty";
-        state = "000000";
+        //state = "000000";
         power = 0;
         element = "empty";
         state_name = "empty";
         consume = 0;
     }
 
-    ability::ability(ability& o)
+    ability::ability(ability& o) : _state()
     {
         name = o.get_name();
-        state = o.get_state();
+        //state = o.get_state();
         power = o.get_power();
         element = o.get_element();
         state_name = o.get_state_name();
         consume = o.get_consume();
+        _state.set_state(o._state.name, o._state.stat_affect, o._state.power, o._state.turn);
     }
 
-    ability::ability(std::string _name, std::string _state, int _power, table_element& _table, int pos, std::string name_state, int cons)
+    ability::ability(std::string _name, int _power, table_element& _table, int pos, std::string name_state, int cons, std::string n, int s, int p, int t, bool fm) : _state()
     {
         name = _name;
-        state = _state;
+        // state = _state;
         power = _power;
         element = _table.get_element(pos);
         state_name = name_state;
         consume = cons;
+        phisical_magical = fm;
+        this->_state.set_state(n, s, p, t);
     }
     std::string ability::get_name()
     {
@@ -557,11 +988,13 @@ namespace rpg
     void ability::modify_abilities(ability& o)
     {
         name = o.get_name();
-        state = o.get_state();
+        //state = o.get_state();
         power = o.get_power();
         element = o.get_element();
         state_name = o.get_state_name();
         consume = o.get_consume();
+        _state.set_state(o._state.name, o._state.stat_affect, o._state.power, o._state.turn);
+
     }
     std::string ability::get_element()
     {
@@ -575,9 +1008,9 @@ namespace rpg
     {
         return consume;
     }
-    std::string ability::get_state()
+    bool ability::get_phisical_magical()
     {
-        return state;
+        return phisical_magical;
     }
     std::string ability::get_state_name()
     {
@@ -586,10 +1019,11 @@ namespace rpg
     void ability::show_data()
     {
         std::cout << "Name: " << name << "\n";
-        std::cout << "State: " << state_name << " code effect: " << state << "\n";
+        //std::cout << "State: " << state_name << " code effect: " << state << "\n";
         std::cout << "Power: " << power << "\n";
         std::cout << "Element: " << element << "\n";
         std::cout << "consume: " << consume << "\n";
+        _state.show_data();
     }
 
     item::item()
@@ -615,7 +1049,7 @@ namespace rpg
         std::cout << "\n\nname: " << name << "\n";
         std::cout << "description: " << description << "\n";
     }
-
+    /*
     weapon::weapon() : item()
     {
         element = "empty";
@@ -700,7 +1134,7 @@ namespace rpg
     {
         delete[]buff_debuff;
     }
-
+    */
     role::role()
     {
         _size = 0;
@@ -843,7 +1277,8 @@ namespace rpg
         turn_state = 0;
         roles = nullptr;
         point_role = nullptr;
-        equipment = nullptr;
+        weapons = nullptr;
+        costumes = nullptr;
         constant = nullptr;
     }
     character::character(std::string _name, const stats& _sts, int num_of_roles, level _levl, role _list[], int equip, int con[]) :_stats(_sts), act_stats(_sts)
@@ -857,8 +1292,13 @@ namespace rpg
         roles = new role[size_of_roles];
         point_role = new int[2];
         num_of_equip = equip;
-        equipment = new weapon[equip];
+        weapons = new weapon*[2];
+        costumes = new costume * [4];
 
+        for (int i = 0; i < 2; i++)
+            weapons[i] = new weapon;
+        for (int i = 0; i < 4; i++)
+            costumes[i] = new costume;
         //equipment = new weapon[num_of_equip];
         for (int i = 0; i < size_of_roles; i++)
         {
@@ -903,14 +1343,7 @@ namespace rpg
     }
     void character::set_turn_state_minus()
     {
-        if (turn_state == 0) {
-            state = "normal";
-            code_state = "00000";
-            redebuff();
-        }
-        else
-            turn_state--;
-
+        act_stats.pass_turn();
     }
     stats character::get_stat_global()
     {
@@ -922,34 +1355,46 @@ namespace rpg
     }
     weapon character::get_weapon(int pos)
     {
-        return equipment[pos];
+        return *weapons[pos];
+    }
+    costume character::get_costume(int pos)
+    {
+        return *costumes[pos];
     }
     char character::get_fisical_magical(int pos, int role)
     {
         int i = 0;
-        while (roles[point_role[role]].get_ability(pos).get_state()[i] != '\0')
-            i++;
-        return roles[point_role[role]].get_ability(pos).get_state()[i - 1];
+        return roles[point_role[role]].get_ability(pos).get_phisical_magical();
     }
     weapon& character::get_wep_f()
     {
-        for (int i = 0; i < num_of_equip; i++)
-            if (equipment[i].get_weapon_type() != "empty")
-                return equipment[i];
-
+        return *weapons[0];
     }
-    void character::equip(int pos, weapon& new_weapon)
+    void character::equip_weapon(int pos, weapon& new_weapon)
     {
-        if (pos < num_of_equip && pos >= 0)
-            equipment[pos].modify(new_weapon);
+        if (pos < 2 && pos >= 0)
+            *weapons[pos]=new_weapon;
         character::modify_stats_equip_or_level();
     }
-    void character::unequip(int pos)
+    void character::unequip_weapon(int pos)
     {
-        if (pos < num_of_equip && pos >= 0)
-            equipment[pos].modify_unequip();
+        if (pos < 2 && pos >= 0)
+            *weapons[pos]=weapon();
         character::modify_stats_equip_or_level();
     }
+    void character::equip_costume(int pos, costume& new_costume)
+    {
+        if (pos < 4 && pos >= 0)
+            *costumes[pos] = new_costume;
+        character::modify_stats_equip_or_level();
+    }
+    void character::unequip_costume(int pos)
+    {
+        if (pos < 4 && pos >= 0)
+            *costumes[pos] = costume();
+        character::modify_stats_equip_or_level();
+    }
+    /*
     void character::modify_stats_buff_debuff()
     {
         if (turn_state > 0) {
@@ -1006,16 +1451,53 @@ namespace rpg
             }
         }
 
+    }*/
+    void character::buff_debuff()
+    {
+        for (int i = 0; i < _stats.get_size(); i++)
+        {
+            if (act_stats._state[i].name != "normal")
+                if (turn_state == act_stats._state[i].turn && (act_stats._state[i].stat_affect != 1 && act_stats._state[i].stat_affect != 0)) {
+                    std::cout << name << " take " << act_stats._state[i].power << " points, of " << act_stats.get_stat_name(act_stats._state[i].stat_affect) << " for " << act_stats._state[i].name;
+                    act_stats.set_v_value(act_stats._state[i].stat_affect,_stats.get_stat_value(act_stats._state[i].stat_affect)+ act_stats._state[i].power);
+                }
+                else if (act_stats._state[i].stat_affect == 1 || act_stats._state[i].stat_affect == 0) {
+                    std::cout << name << " take " << act_stats._state[i].power << " points, of " << act_stats.get_stat_name(act_stats._state[i].stat_affect) << " for " << act_stats._state[i].name;
+                    act_stats.set_v_value(act_stats._state[i].stat_affect, _stats.get_stat_value(act_stats._state[i].stat_affect) + act_stats._state[i].power);
+                }
+            if (act_stats.get_stat_value(0) < 0)
+                act_stats.set_v_value(0, 0);
+            if (act_stats.get_stat_value(1) < 0)
+                act_stats.set_v_value(1, 0);
+            if (act_stats.get_stat_value(0) > _stats.get_stat_value(0))
+                act_stats.set_v_value(0, _stats.get_stat_value(0));
+            if (act_stats.get_stat_value(1) > _stats.get_stat_value(1))
+                act_stats.set_v_value(1, _stats.get_stat_value(1));
+            if (act_stats._state[i].turn == 1)
+            {
+                std::cout << name << " recovered from " << act_stats._state[i].name;
+                if (act_stats._state[i].stat_affect != 1 && act_stats._state[i].stat_affect != 0)
+                    act_stats.set_v_value(act_stats._state[i].stat_affect, _stats.get_stat_value(act_stats._state[i].stat_affect));
+            }
+        }
     }
+    
+    /*
     void character::get_state_turn(ability& o)
     {
         int i = 0;
         while (o.get_state()[i] != '\0')
             i++;
         code_state = o.get_state();
+        state = o.get_state_name();
         std::cout << (o.get_state()[i - 3] - '0') + (o.get_state()[i - 4] - '0') * 10;
         turn_state = (o.get_state()[i - 3] - '0') + (o.get_state()[i - 4] - '0') * 10;
+    }*/
+    void character::get_state_turn(ability& o)
+    {
+        act_stats.set_state(o._state.name, o._state.stat_affect, o._state.power, o._state.turn);
     }
+
 
     /*
         |0000000 0000000 00 m|
@@ -1026,10 +1508,20 @@ namespace rpg
         for (int i = 0; i < _stats.get_size(); i++) {
             _stats.set_v_value(i, constant[i] + (roles[point_role[0]].get_code_role(i) * _level.get_level()));
         }
-        for (int i = 0; i < num_of_equip; i++)
-            if (equipment[i].name != "empty") {
-                for (int j = 0; j < _stats.get_size(); j++) {
-                    _stats.sum_value(j, equipment[i].get_buff_debuff(j));
+        for (int i = 0; i < 2; i++)
+            if (weapons[i]->get_name() != "empty") {
+                for (int j = 0; j < weapons[i]->get_num(); j++) {
+                    for(int k = 0; k < _stats.get_size();k++)
+                        if(weapons[i]->names[j]==_stats.get_stat_name(k))
+                            _stats.sum_value(k, weapons[i]->improve[j]);
+                }
+            }
+        for (int i = 0; i < 4; i++)
+            if (costumes[i]->get_name() != "empty") {
+                for (int j = 0; j < costumes[i]->get_num(); j++) {
+                    for (int k = 0; k < _stats.get_size(); k++)
+                        if (costumes[i]->names[j] == _stats.get_stat_name(k))
+                            _stats.sum_value(k, costumes[i]->improve[j]);
                 }
             }
         for (int i = 0; i < _stats.get_size(); i++)
@@ -1092,16 +1584,15 @@ namespace rpg
         if (o.get_name() != "empty") {
             int pow = o.get_power();
             int i = 0;
-            while (o.get_state()[i] != '\0')
-                i++;
-            char mn = o.get_state()[--i];
-            if (mn == 'n') {
+         
+            bool mn = o.get_phisical_magical();
+            if (mn == true) {
                 act_stats.sum_value(0, -((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)));
                 std::cout << name << " received " << o.get_name();
                 if (-((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)) != 0)
                     std::cout << " and took " << ((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)) << " damage " << "\n";
             }
-            if (mn == 'm') {
+            if (mn == false) {
                 act_stats.sum_value(0, -((power + con) / act_stats.get_stat_value(5) * (o.get_power() / 10)));
                 std::cout << name << " received " << o.get_name();
                 if (-((power + con) / act_stats.get_stat_value(5) * (o.get_power() / 10)) != 0)
@@ -1127,17 +1618,61 @@ namespace rpg
             act_stats.set_v_value(0, 0);
 
     }
+
+
+    void character::damage(int power, ability& o)
+    {
+        int con = rand() % 100 + 85;
+        if (o.get_name() != "empty") {
+            int pow = o.get_power();
+            int i = 0;
+           
+            bool mn = o.get_phisical_magical();
+            if (mn == true) {
+                act_stats.sum_value(0, -((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)));
+                std::cout << name << " received " << o.get_name();
+                if (-((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)) != 0)
+                    std::cout << " and took " << ((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)) << " damage " << "\n";
+            }
+            if (mn == true) {
+                act_stats.sum_value(0, -((power + con) / act_stats.get_stat_value(5) * (o.get_power() / 10)));
+                std::cout << name << " received " << o.get_name();
+                if (-((power + con) / act_stats.get_stat_value(5) * (o.get_power() / 10)) != 0)
+                    std::cout << " and took " << ((power + con) / act_stats.get_stat_value(5) * (o.get_power() / 10)) << " damage " << "\n";
+            }
+            if (o._state.name != "normal")
+                get_state_turn(o);
+        }
+        else
+        {
+            if (o.get_state_name() != "empty") {
+                act_stats.sum_value(0, -((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)));
+                std::cout << name << " received " << o.get_name();
+                if (-((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)) != 0)
+                    std::cout << " and took " << ((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)) << " damage " << "\n";
+            }
+            else {
+                act_stats.sum_value(0, -((power + con) / act_stats.get_stat_value(3)));
+                std::cout << name << " took " << ((power + con) / act_stats.get_stat_value(3) * (o.get_power() / 10)) << " damage " << "\n";
+            }
+        }
+        if (act_stats.get_stat_value(0) < 0)
+            act_stats.set_v_value(0, 0);
+
+    }
+    
+
+
     void character::redebuff()
     {
         for (int i = 0; i < _stats.get_size(); i++)
             if (i != 0 && i != 1)
                 act_stats.set_v_value(i, _stats.get_stat_value(i));
-
     }
     void character::show_equipment()
     {
-        for (int i = 0; i < num_of_equip; i++)
-            equipment[i].show_data();
+        for (int i = 0; i < 2; i++)
+            weapons[i]->show_data();
     }
     void character::show_act_stats()
     {
@@ -1147,8 +1682,8 @@ namespace rpg
     {
         int sum = 0;
         for (int i = 0; i < num; i++)
-            for (int j = 0; j < num_of_equip; j++)
-                if (l_weapon[num] == equipment[num_of_equip].get_weapon_type())
+            for (int j = 0; j < 2; j++)
+                if (l_weapon[num] == weapons[j]->get_type())
                 {
                     if (roles[point_role[0]].get_code_weapons()[i] == 's')
                         sum += _stats.get_stat_value(2);
@@ -1167,7 +1702,8 @@ namespace rpg
     character::~character()
     {
         delete[]point_role;
-        delete[]equipment;
+        delete[]weapons;
+        delete[]costumes;
         delete[]constant;
     }
 
@@ -1179,13 +1715,11 @@ namespace rpg
         experience = 0;
         experience_class = 0;
         num_ability = 0;
-        state = "normal";
         turn_state = 0;
     }
     enemy::enemy(const enemy& o) : stadistic(o.stadistic), act_statdistic(o.stadistic)
     {
         name = o.name;
-        state = "nomal";
         experience = o.experience;
         experience_class = o.experience_class;
         num_ability = o.num_ability;
@@ -1199,7 +1733,6 @@ namespace rpg
     enemy::enemy(std::string _name, float exp, float exp_class, stats& _sts, ability habs[], int num_ab, table_element& table, int pos) : stadistic(_sts), act_statdistic(_sts)
     {
         name = _name;
-        state = "nomal";
         experience = exp;
         experience_class = exp_class;
         num_ability = num_ab;
@@ -1210,7 +1743,7 @@ namespace rpg
         for (int i = 0; i < num_ability; i++)
             abilities[i].modify_abilities(habs[i]);
     }
-
+    /*
     void enemy::buff_debuff()
     {
         if (turn_state > 0) {
@@ -1269,39 +1802,58 @@ namespace rpg
         }
 
     }
+    */
 
+    void enemy::buff_debuff()
+    {
+        for (int i = 0; i < stadistic.get_size(); i++)
+        {
+            if (act_statdistic._state[i].name != "normal")
+                if (turn_state == act_statdistic._state[i].turn && (act_statdistic._state[i].stat_affect != 1 && act_statdistic._state[i].stat_affect != 0)) {
+                    std::cout << name << " take " << act_statdistic._state[i].power << " points of " << act_statdistic.get_stat_name(act_statdistic._state[i].stat_affect) << " for " << act_statdistic._state[i].name;
+                    act_statdistic.set_v_value(act_statdistic._state[i].stat_affect, act_statdistic.get_stat_value(act_statdistic._state[i].stat_affect) + act_statdistic._state[i].power);
+                }
+                else if (act_statdistic._state[i].stat_affect == 1 || act_statdistic._state[i].stat_affect == 0) {
+                    std::cout << name << " take " << act_statdistic._state[i].power << " points of " << act_statdistic.get_stat_name(act_statdistic._state[i].stat_affect) << " for " << act_statdistic._state[i].name;
+                    act_statdistic.set_v_value(act_statdistic._state[i].stat_affect, act_statdistic.get_stat_value(act_statdistic._state[i].stat_affect) + act_statdistic._state[i].power);
+                }
+            if (act_statdistic.get_stat_value(0) < 0)
+                act_statdistic.set_v_value(0, 0);
+            if (act_statdistic.get_stat_value(1) < 0)
+                act_statdistic.set_v_value(1, 0);
+            if (act_statdistic.get_stat_value(0) > stadistic.get_stat_value(0))
+                act_statdistic.set_v_value(0, stadistic.get_stat_value(0));
+            if (act_statdistic.get_stat_value(1) > stadistic.get_stat_value(0))
+                act_statdistic.set_v_value(1, stadistic.get_stat_value(0));
+            if (act_statdistic._state[i].turn == 1)
+            {
+                std::cout << name << " recovered from " << act_statdistic._state[i].name;
+                if (act_statdistic._state[i].stat_affect != 1 && act_statdistic._state[i].stat_affect != 0)
+                    act_statdistic.set_v_value(act_statdistic._state[i].stat_affect, stadistic.get_stat_value(act_statdistic._state[i].stat_affect));
+            }
+        }
+    }
     void enemy::get_state_turn(ability& o)
     {
-        int i = 0;
-        while (o.get_state()[i] != '\0')
-            i++;
-        state = o.get_state_name();
-        code_state = o.get_state();
-        turn_state = (o.get_state()[i - 3] - '0') + (o.get_state()[i - 4] - '0') * 10;
+        act_statdistic.set_state(o._state.name, o._state.stat_affect, o._state.power, o._state.turn);
     }
     void enemy::turn_state_minus()
     {
-        if (turn_state == 0) {
-            state = "normal";
-            code_state = "00000";
-            redebuff_();
-        }
-        else
-            turn_state--;
-
+        act_statdistic.pass_turn();
     }
     char enemy::get_fisical_magical(int pos)
     {
-        int i = 0;
-        while (abilities[pos].get_state()[i] != '\0')
-            i++;
-        return abilities[pos].get_state()[i - 1];
+        return abilities[pos].get_phisical_magical();
     }
     void enemy::rest_mp(int pos)
     {
         act_statdistic.set_v_value(1, abilities[pos].get_consume());
         if (act_statdistic.get_stat_value(1) < 0)
             act_statdistic.set_v_value(1, 0);
+    }
+    std::string enemy::get_name()
+    {
+        return name;
     }
     void enemy::take_damage(int power, ability& o, table_element& table, weapon& w)
     {
@@ -1319,14 +1871,13 @@ namespace rpg
             if (debw == 3)
                 debw = 2;
             int i = 0;
-            while (o.get_state()[i] != '\0')
-                i++;
-            char mn = o.get_state()[--i];
-            if (mn == 'n') {
+            
+            bool mn = o.get_phisical_magical();
+            if (mn == true) {
                 std::cout << name << " it was sent to him " << o.get_name() << " and receive " << ((power + con) * debi * debw) / act_statdistic.get_stat_value(3) * o.get_power();
                 act_statdistic.sum_value(0, -(((power + con) * debi * debw) / act_statdistic.get_stat_value(3) * o.get_power()));
             }
-            if (mn == 'm') {
+            if (mn == false) {
                 std::cout << name << " it was sent to him " << o.get_name() << " and receive " << ((power + con) * debi * debw) / act_statdistic.get_stat_value(5) * o.get_power();
                 act_statdistic.sum_value(0, -(((power + con) * debi) / act_statdistic.get_stat_value(5) * o.get_power()));
             }
@@ -1373,12 +1924,8 @@ namespace rpg
 
     bool enemy::benefic_ability_election(int pos)
     {
-        int i = 0;
-        while (abilities[pos].get_state()[i] != ' ') {
-            if (abilities[pos].get_state()[i] - '0' != 0)
+        if (abilities[pos]._state.power > 0) 
                 return true;
-            i++;
-        }
         return false;
     }
     void enemy::set_name(std::string new_name)
@@ -1405,6 +1952,374 @@ namespace rpg
         delete[] abilities;
     }
 
+    
+    class consumible : public item {
+        state stt;
+        bool add_remove;
+        std::string elem;
+        int power;
+    public:
+        consumible(std::string, std::string, bool, std::string, int);
+        consumible(std::string, std::string, std::string, int, int, int, bool, std::string, int);
+        state& get_state();
+        std::string get_element();
+        bool getact();
+        void show();
+        void player_affect(character& o);
+        void enemy_affect(enemy& o, table_element& i);
+        friend class inventory;
+    };
+
+    consumible::consumible(std::string name, std::string description, bool ac, std::string elem, int power) : item(name, description), stt()
+    {
+        add_remove = ac;
+        this->elem = elem;
+        this->power = power;
+    }
+    consumible::consumible(std::string name, std::string description, std::string state_name, int staf, int pow, int turn, bool ac, std::string elem, int power) : item(name, description), stt()
+    {
+        add_remove = ac;
+        this->elem = elem;
+        this->power = power;
+        stt.set_state(state_name, staf, turn, pow);
+    }
+    state& consumible::get_state()
+    {
+        return stt;
+    }
+    std::string consumible::get_element()
+    {
+        return elem;
+    }
+    bool consumible::getact()
+    {
+        return add_remove;
+    }
+
+    void consumible::show()
+    {
+        show_data();
+        std::cout << "state : " << stt.name << "\n";
+        if (add_remove == true)
+            std::cout << "the state will add to the objetive \n";
+        else
+            std::cout << "the state will be remove to the objetive";
+        std::cout << "\npower:" << power;
+    }
+
+    void consumible::player_affect(character& o)
+    {
+        ability aux;
+        if (power > 0)
+            o.take_damage(power, aux);
+        if (add_remove == true)
+        {
+            std::cout << o.get_name() << " received " << name;
+            if(stt.name != "normal")
+                o.act_stats.set_state(stt.name, stt.stat_affect, stt.power, stt.turn);
+        }
+        else
+        {
+            std::cout << o.get_name() << " received " << name;
+            if (stt.name != "normal")
+                o.act_stats.remove_state(name);
+        }
+    }
+    void consumible::enemy_affect(enemy& o, table_element& table)
+    {
+        ability aux;
+        weapon we(0, nullptr, nullptr, elem, "0","0");
+
+        if (power > 0)
+            o.take_damage(power, aux, table, we);
+        if (add_remove == true)
+        {
+            std::cout << o.get_name() << " received " << name;
+            if (stt.name != "normal")
+                o.act_statdistic.set_state(stt.name, stt.stat_affect, stt.power, stt.turn);
+        }
+        else
+        {
+            std::cout << o.get_name() << " received " << name;
+            if (stt.name != "normal")
+                o.act_statdistic.remove_state(name);
+        }
+    }
+
+    struct inventory
+    {
+        consumible** consumibles;
+        int num_con;
+        weapon** weapons;
+        int num_wea;
+        costume** costumes;
+        int num_equip;
+   
+        inventory();
+
+        void push_consumible(std::string, std::string, std::string, int, int, int, bool, std::string, int);
+        void push_weapon(int, std::string*, int*, std::string, std::string, int, int, int, std::string, std::string, std::string);
+        void push_costume(int, std::string*, int*, std::string, std::string, int, int, int, std::string, std::string, std::string);
+
+        void delete_consumible(int);
+        void delete_weapon(int);
+        void delete_costume(int);
+
+        void use_item(int, character&);
+        void use_item_enemy(int, enemy&, table_element& y);
+        void equip_weapon(int, int, character&);
+        void unequip_weapon(int, int, character&);
+        void equip_costume(int, int, character&);
+        void unequip_costume(int, int, character&);
+
+        void show_con();
+        void show_weap();
+        void show_cost();
+
+        ~inventory();
+    };
+
+
+    inventory::inventory()
+    {
+        consumibles = new consumible * [100];
+        weapons = new weapon * [100];
+        costumes = new costume * [100];
+        num_con = 0;
+        num_equip = 0;
+        num_wea = 0;
+    }
+
+    void inventory::push_consumible(std::string name, std::string description, std::string stt_name, int statfect, int power, int turn, bool addremove, std::string elem, int powe)
+    {
+        if (num_con < 100) {
+            consumibles[num_con] = new consumible(name, description, stt_name, statfect, power, turn, addremove, elem, powe);
+            num_con++;
+        }
+    }
+
+    void inventory::push_weapon(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d, std::string type)
+    {
+        if (num_wea < 100) {
+            if (type == "sword") {
+                weapons[num_wea] = new sword(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_wea++;
+                std::cout << "you got : " << weapons[num_wea - 1]->get_name() << "\n";
+            }
+            if (type == "shield") {
+                weapons[num_wea] = new shield(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_wea++;
+                std::cout << "you got : " << weapons[num_wea - 1]->get_name() << "\n";
+            }
+            if (type == "spear") {
+                weapons[num_wea] = new spear(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_wea++;
+                std::cout << "you got : " << weapons[num_wea - 1]->get_name() << "\n";
+            }
+            if (type == "axe") {
+                weapons[num_wea] = new axe(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_wea++;
+                std::cout << "you got : " << weapons[num_wea - 1]->get_name() << "\n";
+            }
+            if (type == "knife") {
+                weapons[num_wea] = new knife(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_wea++;
+                std::cout << "you got : " << weapons[num_wea - 1]->get_name() << "\n";
+            }
+            if (type == "bow") {
+                weapons[num_wea] = new bow(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_wea++;
+                std::cout << "you got : " << weapons[num_wea - 1]->get_name() << "\n";
+            }
+            if (type == "crosier") {
+                weapons[num_wea] = new crosier(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_wea++;
+                std::cout << "you got : " << weapons[num_wea - 1]->get_name() << "\n";
+            }
+        }
+    }
+
+    void inventory::push_costume(int num, std::string* stats, int* improvement, std::string element, std::string state_name, int stat_eff, int pow, int turns, std::string n, std::string d, std::string type)
+    {
+        if (num_equip < 100) {
+            if (type == "head") {
+                costumes[num_equip] = new head(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_equip++;
+                std::cout << "you got : " << costumes[num_equip - 1]->get_name() << "\n";
+            }
+            if (type == "armor") {
+                costumes[num_equip] = new armor(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_equip++;
+                std::cout << "you got : " << costumes[num_equip - 1]->get_name() << "\n";
+            }
+            if (type == "legs") {
+                costumes[num_equip] = new legs(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_equip++;
+                std::cout << "you got : " << costumes[num_equip - 1]->get_name() << "\n";
+            }
+            if (type == "accesory") {
+                costumes[num_equip] = new accesory(num, stats, improvement, element, state_name, stat_eff, pow, turns, n, d);
+                num_equip++;
+                std::cout << "you got : " << costumes[num_equip - 1]->get_name() << "\n";
+            }
+        }
+    }
+
+    void inventory::delete_consumible(int pos)
+    {
+        if (pos < num_con) {
+            
+            for (int i = pos; i < num_con; i++)
+                consumibles[i] = consumibles[i + 1];
+            num_con--;
+        }
+    }
+
+    void inventory::delete_weapon(int pos)
+    {
+        if (pos < num_equip) {
+            if (weapons[pos]->get_equip() == false)
+            {
+                std::cout << weapons[pos]->get_name() << " deleted\n";
+               
+                for (int i = pos; i < num_wea; i++)
+                    weapons[i] = weapons[i + 1];
+                num_wea--;
+            }
+            else
+                std::cout << "this weapon is equipped, cannot be delete this\n";
+        }
+    }
+
+    void inventory::delete_costume(int pos)
+    {
+        if (pos < num_equip) {
+            if (costumes[pos]->get_equip() == false)
+            {
+                std::cout << costumes[pos]->get_name() << " deleted\n";
+               
+                for (int i = pos; i < num_equip; i++)
+                    costumes[i] = costumes[i + 1];
+                num_equip--;
+            }
+            else
+                std::cout << "this weapon is equipped, cannot be delete this\n";
+        }
+    }
+
+    void inventory::equip_weapon(int po, int pos, character& o)
+    {
+        if (weapons[pos]->get_equip() == false)
+        {
+            o.equip_weapon(po, *weapons[pos]);
+        }
+    }
+    void inventory::unequip_weapon(int po, int pos, character& o)
+    {
+        if (weapons[pos]->get_equip() == true) {
+            if (o.get_weapon(po).get_name() == weapons[pos]->get_name()) {
+                o.unequip_weapon(po);
+                weapons[pos]->unequiped();
+            }
+        }
+    }
+
+    void inventory::equip_costume(int po, int pos, character& o)
+    {
+        if (costumes[pos]->get_equip() == false)
+        {
+            o.equip_costume(po, *costumes[pos]);
+        }
+    }
+    void inventory::unequip_costume(int po, int pos, character& o)
+    {
+        if (costumes[pos]->get_equip() == true) {
+            if (o.get_costume(po).get_name() == costumes[pos]->get_name()) {
+                o.unequip_costume(po);
+                costumes[pos]->unequiped();
+            }
+        }
+    }
+
+    void inventory::use_item(int pos, character& o)
+    {
+        consumibles[pos]->player_affect(o);
+        delete_consumible(pos);
+    }
+    void inventory::use_item_enemy(int pos, enemy& o, table_element &y)
+    {
+        consumibles[pos]->enemy_affect(o, y);
+        delete_consumible(pos);
+    }
+
+    void inventory::show_con()
+    {
+        for (int i = 0; i < num_con; i++)
+            std::cout << "(" << i << ") " << consumibles[i]->get_name();
+    }
+    void inventory::show_weap()
+    {
+        for (int i = 0; i < num_wea; i++)
+            std::cout << "(" << i << ") " << weapons[i]->get_name();
+    }
+    void inventory::show_cost()
+    {
+        for (int i = 0; i < num_equip; i++)
+            std::cout << "(" << i << ") " << costumes[i]->get_name();
+    }
+
+    inventory::~inventory()
+    {
+        for (int i = 0; i < 100; i++)
+            delete consumibles[i];
+        delete[] consumibles;
+        for (int i = 0; i < 100; i++)
+            delete weapons[i];
+        delete[] weapons;
+        for (int i = 0; i < 100; i++)
+            delete costumes[i];
+        delete[] costumes;
+    }
+
+    class Combat {
+    private:
+        int* turn;
+        std::string* n_turn;
+        int combat_size;
+        int position;
+        int players_size;
+        int enemies_size;
+        int num_of_turns;
+
+        bool playerturn;
+        bool escape;
+        bool playerdefeated;
+        bool enemydefeated;
+        std::string* weapon_table;
+
+    public:
+        Combat();
+        Combat(character[], enemy enemies[], int players_team, int enemies_team, std::string[], int, table_element&, inventory&);
+        virtual ~Combat();
+
+        void put_speed(character players[], enemy enemies[]);
+        void sort_speed();
+        void show_array();
+
+        void actualize_speed(character players[], enemy enemies[]);
+
+        void evaluate_hp(character players[], enemy enemies[]);
+
+        void show_data(character players[], enemy[]);
+        void change_array();
+        void set_state(character players[], enemy[]);
+        void search_turn(character players[], enemy[]);
+        void initCombat(character players[], enemy enemies[], table_element&, inventory&);
+        void remove(character players[], enemy enemies[], int n);
+        friend class character;
+        friend class enemy;
+    };
+
     Combat::Combat() {
         n_turn = 0;
         playerturn = false;
@@ -1419,7 +2334,7 @@ namespace rpg
         turn = 0;
 
     }
-    Combat::Combat(character players[], enemy enemies[], int players_team, int enemies_team, std::string table_w[], int num, table_element& table) {
+    Combat::Combat(character players[], enemy enemies[], int players_team, int enemies_team, std::string table_w[], int num, table_element& table, inventory& inven) {
         playerturn = false;
         escape = false;
         playerdefeated = false;
@@ -1432,7 +2347,7 @@ namespace rpg
         for (int i = 0; i < 6; i++)
             weapon_table[i] = table_w[i];
         put_speed(players, enemies);
-        initCombat(players, enemies, table);
+        initCombat(players, enemies, table, inven);
     }
     Combat::~Combat() {
         delete[]turn;
@@ -1554,8 +2469,9 @@ namespace rpg
         change_array();
     }
 
-    void Combat::initCombat(character players[], enemy enemies[], table_element& table) {
+    void Combat::initCombat(character players[], enemy enemies[], table_element& table, inventory &inven) {
         std::cout << "turn based combat\n";
+
         int choice = 0;
         int second_choice = 0;
         int third_choice = 0;
@@ -1570,6 +2486,8 @@ namespace rpg
             show_data(players, enemies);
             search_turn(players, enemies);
 
+            std::string id_defend="0";
+
             num_of_turns++;
 
             valid = false;
@@ -1579,10 +2497,16 @@ namespace rpg
 
             if (playerturn && enemies_size != 0 && players_size != 0) { //turn of players
                 do {
+                    if (id_defend == players[position].get_name())
+                    {
+                        players[position].act_stats.set_v_value(2, players[position].act_stats.get_stat_value(2) /2);
+                        id_defend = "0";
+                    }
+
                     second_choice = 0;
                     third_choice = 0;
                     std::cout << "turn of player: " << players[position].name << "\n";
-                    std::cout << "(1)attack\n(2)ability for\n(3)ability for second class\n(4)escape" << "\n";
+                    std::cout << "(1)attack\n(2)ability for primal class\n(3)ability for second class\n(4)escape\n(5)defend\n(6)show stats\n(7)use item" << "\n";
                     std::cin >> choice;
                     switch (choice) { //actions
                     case 1://attack
@@ -1656,9 +2580,9 @@ namespace rpg
                         std::cin >> third_choice;
                         if (third_choice < enemies_size) {
                             players[position].rest_mp(second_choice, 0);
-                            if (players[position].get_fisical_magical(second_choice, 0) == 'n')
+                            if (players[position].get_fisical_magical(second_choice, 0) == true)
                                 enemies[third_choice].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[0]].get_ability(second_choice), table, players[position].get_wep_f());
-                            if (players[position].get_fisical_magical(second_choice, 0) == 'm')
+                            if (players[position].get_fisical_magical(second_choice, 0) == false)
                                 enemies[third_choice].take_damage(players[position].act_stats.get_stat_value(4), players[position].roles[players[position].point_role[0]].get_ability(second_choice), table, players[position].get_wep_f());
 
                             if (enemies[third_choice].act_statdistic.get_stat_value(0) == 0) { //if enemy is dead
@@ -1678,11 +2602,11 @@ namespace rpg
                             players[position].rest_mp(second_choice, 0);
                             int min = combat_size - third_choice - 1;
                             std::cout << min;
-                            if (players[position].get_fisical_magical(second_choice, 0) == 'n')
+                            if (players[position].get_fisical_magical(second_choice, 0) == true)
                                 players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[0]].get_ability(second_choice));
-                            if (players[position].get_fisical_magical(second_choice, 0) == 'm')
+                            if (players[position].get_fisical_magical(second_choice, 0) == false)
                                 players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[0]].get_ability(second_choice));
-                            players[min].modify_stats_buff_debuff();
+                            players[min].buff_debuff();
                             if (players[min].act_stats.get_stat_value(0) == 0) {// player is dead
                                 std::cout << "player: " << players[min].name << " defeated\n";
                                 playerdefeated = true;
@@ -1715,9 +2639,9 @@ namespace rpg
                         std::cin >> third_choice;
                         if (third_choice < enemies_size) {
                             players[position].rest_mp(second_choice, 1);
-                            if (players[position].get_fisical_magical(second_choice, 1) == 'n')
+                            if (players[position].get_fisical_magical(second_choice, 1) == true)
                                 enemies[third_choice].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[1]].get_ability(second_choice), table, players[position].get_wep_f());
-                            if (players[position].get_fisical_magical(second_choice, 1) == 'm')
+                            if (players[position].get_fisical_magical(second_choice, 1) == false)
                                 enemies[third_choice].take_damage(players[position].act_stats.get_stat_value(4), players[position].roles[players[position].point_role[1]].get_ability(second_choice), table, players[position].get_wep_f());
 
                             if (enemies[third_choice].act_statdistic.get_stat_value(0) == 0) { //if enemy is dead
@@ -1736,11 +2660,11 @@ namespace rpg
                             players[position].rest_mp(second_choice, 1);
                             int min = combat_size - third_choice - 1;
                             std::cout << min;
-                            if (players[position].get_fisical_magical(second_choice, 1) == 'n')
+                            if (players[position].get_fisical_magical(second_choice, 1) == true)
                                 players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[1]].get_ability(second_choice));
-                            if (players[position].get_fisical_magical(second_choice, 1) == 'm')
+                            if (players[position].get_fisical_magical(second_choice, 1) == false)
                                 players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[1]].get_ability(second_choice));
-                            players[min].modify_stats_buff_debuff();
+                            players[min].buff_debuff();
                             if (players[min].act_stats.get_stat_value(0) == 0) {// player is dead
                                 std::cout << "player: " << players[min].name << " defeated\n";
                                 playerdefeated = true;
@@ -1753,10 +2677,61 @@ namespace rpg
                     case 4://escape
                         escape = true;
                         break;
+                    
+                    case 5://defend
+                        id_defend = players[position].get_name();
+                        players[position].act_stats.set_v_value(2, players[position].act_stats.get_stat_value(2) * 2);
+                        std::cout << players[position].get_name() << " defends\n";
+                        break;
+                    case 6://show stats
+                        std::cout << players[position].get_name() << "\n";
+                        players[position].act_stats.show_data();
+                        players[position].act_stats.show_state();
+                        choice = -1;
+                        break;
+                    case 7:
+                        std::cout << "select item\n\n";
+                        inven.show_con();
+                        std::cin >> second_choice;
+                        std::cout << "choose the objetive\n";
+                        for (int i = 0; i < enemies_size; i++) {
+                            std::cout << "(" << i << ")" << "enemy: " << enemies[i].name << "\n";
+                        }
+                        for (int j = enemies_size; j < combat_size; j++) {
+                            std::cout << "(" << j << ")" << "player: " << players[combat_size - j - 1].name << "\n";
+                        }
+                        std::cout << "(" << combat_size << ")back:" << "\n";
+                        std::cin >> third_choice;
+                        if (third_choice < enemies_size && third_choice >0) {
+                            inven.use_item_enemy(second_choice, enemies[third_choice], table);
+                            if (enemies[third_choice].act_statdistic.get_stat_value(0) == 0) { //if enemy is dead
+                                std::cout << "enemy: " << enemies[third_choice].name << " defeated\n";
+                                enemydefeated = true;
+                                for (int j = 0; j < players_size; j++) {
+                                    players[j].set_experience_entity(enemies[third_choice].get_experience());
+                                    players[j].set_experience_class(enemies[third_choice].get_experience_class());
+                                    actualize_speed(players, enemies);
+                                }
+                                remove(players, enemies, third_choice);
+                                enemydefeated = false;
+                            }
+                        }
+                        else if (third_choice >= enemies_size && third_choice < combat_size)
+                        {
+                            int min = combat_size - third_choice - 1;
+                            inven.use_item(second_choice, players[min]);
+                            if (players[min].act_stats.get_stat_value(0) == 0) {// player is dead
+                                std::cout << "player: " << players[min].name << " defeated\n";
+                                playerdefeated = true;
+                                remove(players, enemies, min);
+                                playerdefeated = false;
+                            }
+                        }
+                        else if (third_choice == 0)
+                            choice = -1;
                     }
-
-                } while (second_choice == enemies_size && choice != 1 && enemies_size != 0);
-                players[position].modify_stats_buff_debuff();
+                } while (choice == -1 && enemies_size != 0);
+                players[position].buff_debuff();
                 players[position].set_turn_state_minus();
             }
             else if (!playerturn && enemies_size != 0 && players_size != 0)
@@ -1832,7 +2807,7 @@ namespace rpg
 
         }
         for (int i = 0; i < players_size; i++) {
-            players[i].modify_stats_buff_debuff();
+            players[i].buff_debuff();
             players[i].set_turn_state_minus();
         }
     }
