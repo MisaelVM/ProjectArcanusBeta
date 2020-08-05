@@ -2698,7 +2698,7 @@ namespace rpg
                         escape = true;
                         break;
                     }
-                } while (choice == -1 && enemies_size != 0);
+                } while ((second_choice == const_size || third_choice == const_size) && choice != 4 && enemies_size != 0);
                 players[position].buff_debuff();
                 players[position].set_turn_state_minus();
             }
