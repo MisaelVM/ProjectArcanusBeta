@@ -2839,8 +2839,9 @@ namespace rpg
                         turn[l] = turn[l + 1];
                         n_turn[l] = n_turn[l + 1];
                     }
+		}
             turn[combat_size-1]=x; //put at the end of the array
-			n_turn[combat_size-1]=y;
+	    n_turn[combat_size-1]=y;
             players_size--;
             combat_size--;
         }
