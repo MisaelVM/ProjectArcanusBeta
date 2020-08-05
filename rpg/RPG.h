@@ -2270,13 +2270,13 @@ namespace rpg
 
     inventory::~inventory()
     {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < num_con; i++)
             delete consumibles[i];
         delete[] consumibles;
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < num_wea; i++)
             delete weapons[i];
         delete[] weapons;
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < num_equip; i++)
             delete costumes[i];
         delete[] costumes;
     }
@@ -2290,6 +2290,7 @@ namespace rpg
         int players_size;
         int enemies_size;
         int num_of_turns;
+        int const_size;//for defeated players
 
         bool playerturn;
         bool escape;
@@ -2311,9 +2312,14 @@ namespace rpg
         void evaluate_hp(character players[], enemy enemies[]);
 
         void show_data(character players[], enemy[]);
+        void show_targets(character players[], enemy enemies[], int& targ); //view all targets available
+        void select_ability(character players[], int& pos, int point_ro, bool valid); //view our abilities
+        
         void change_array();
         void set_state(character players[], enemy[]);
         void search_turn(character players[], enemy[]);
+        void If_dead(character players[], enemy enemies[], int pos, int E_P);
+        
         void initCombat(character players[], enemy enemies[], table_element&, inventory&);
         void remove(character players[], enemy enemies[], int n);
         friend class character;
@@ -2331,6 +2337,7 @@ namespace rpg
         players_size = 1;
         enemies_size = 1;
         combat_size = 0;
+        const_size = 0;
         turn = 0;
 
     }
@@ -2407,21 +2414,13 @@ namespace rpg
             key2 = *(n_turn + i);
             j = i - 1;
 
-            while (j >= 0 && *(turn + j) > key) {
+            while (j >= 0 && *(turn + j) < key) {
                 *(turn + j + 1) = *(turn + j);
                 *(n_turn + j + 1) = *(n_turn + j);
                 j = j - 1;
             }
             *(turn + j + 1) = key;
             *(n_turn + j + 1) = key2;
-        }
-        for (int j = 0; j < combat_size / 2; j++) { //invert the sort
-            int a = *(turn + j);
-            std::string a2 = *(n_turn + j);
-            *(turn + j) = *(turn + combat_size - 1 - j);
-            *(turn + combat_size - 1 - j) = a;
-            *(n_turn + j) = *(n_turn + combat_size - 1 - j);
-            *(n_turn + combat_size - 1 - j) = a2;
         }
     }
 
@@ -2469,6 +2468,60 @@ namespace rpg
         change_array();
     }
 
+    void Combat::select_ability(character players[], int& pos, int point_ro, bool valid){ //point_ro = .point_role
+        std::cout << "choose ability\n\n";
+        for (int i = 0; i < players[position].get_roles(0).get_size(); i++)
+            std::cout << "(" << i << ")  " << players[position].roles[players[position].point_role[point_ro]].get_ability(i).get_name() << " cost: " << players[position].roles[players[position].point_role[point_ro]].get_ability(i).get_consume() << "\n";
+
+        while (valid == false) {
+            std::cin >> pos;
+            if (players[position].act_stats.get_stat_value(1) < players[position].roles[players[position].point_role[point_ro]].get_ability(pos).get_consume())
+                std::cout << "not enough magic points\n";
+            else
+               valid = true;
+        }
+    }
+    
+    void Combat::show_targets(character players[], enemy enemies[], int& targ) { //show the targets that you can attack
+        std::cout << "choose the objetive\n";
+        for (int i = 0; i < enemies_size; i++) {
+            std::cout << "(" << i << ") " << "enemy: " << enemies[i].name << "\n";
+        }
+        for (int j = enemies_size; j < combat_size; j++) {
+            std::cout << "(" << j << ") " << "player: " << players[combat_size - j - 1].name << "\n";
+        }
+		for (int k=combat_size; k<const_size;k++){
+			std::cout<<"("<<k<<") "<<"defeated: " << players[(players_size-1)+(const_size-k)].name<<"\n";
+		}
+		
+        std::cout << "(" << const_size << ") back:" << "\n";
+        std::cin >>targ;
+    }
+    
+    void Combat::If_dead(character players[], enemy enemies[], int pos, int E_P){ 
+        switch (E_P){ // (E_P=0)= ENEMY (E_P=1) =PLAYER 
+        case 0:    
+            if(enemies[pos].act_statdistic.get_stat_value(0) == 0){//if player is dead
+                std::cout << "enemy: " << enemies[pos].name << " defeated\n";
+                enemydefeated = true;
+                for (int j = 0; j < players_size; j++) {
+                    players[j].set_experience_entity(enemies[pos].get_experience());
+                    players[j].set_experience_class(enemies[pos].get_experience_class());
+                    actualize_speed(players, enemies);
+                }
+                remove(players, enemies, pos);
+            }
+            break;
+        case 1:
+            if(players[pos].act_stats.get_stat_value(0) == 0){ //if player is dead
+                std::cout << "player: " << players[pos].name << " defeated\n";
+                playerdefeated = true;
+                remove(players, enemies, pos);
+            }
+            break;
+        }
+    }
+    
     void Combat::initCombat(character players[], enemy enemies[], table_element& table, inventory &inven) {
         std::cout << "turn based combat\n";
 
@@ -2502,82 +2555,41 @@ namespace rpg
                         players[position].act_stats.set_v_value(2, players[position].act_stats.get_stat_value(2) /2);
                         id_defend = "0";
                     }
-
+                    
+                    valid = false;
+                    choice = 0;
                     second_choice = 0;
                     third_choice = 0;
                     std::cout << "turn of player: " << players[position].name << "\n";
-                    std::cout << "(1)attack\n(2)ability for primal class\n(3)ability for second class\n(4)escape\n(5)defend\n(6)show stats\n(7)use item" << "\n";
+                    std::cout << "(1) attack\n(2) ability for\n(3) ability for second class\n(4) defend\n(5) show_stats\n(6) items\n(7) escape" << "\n";
                     std::cin >> choice;
                     switch (choice) { //actions
                     case 1://attack
-                        std::cout << "choose the objetive\n";
-                        for (int i = 0; i < enemies_size; i++) {
-                            std::cout << "(" << i << ")" << "enemy: " << enemies[i].name << "\n";
-                        }
-                        for (int j = enemies_size; j < combat_size; j++) {
-                            std::cout << "(" << j << ")" << "player: " << players[combat_size - j - 1].name << "\n";
-                        }
-                        std::cout << "(" << combat_size << ")back:" << "\n";
-                        std::cin >> second_choice;
-
+                            
+                        show_targets(players, enemies, second_choice); //targets
 
                         if (second_choice < enemies_size) {
 
                             enemies[second_choice].take_damage(players[position].act_stats.get_stat_value(2), aux, table, players[position].get_wep_f());
 
-
-
-                            if (enemies[second_choice].act_statdistic.get_stat_value(0) == 0) { //if enemy is dead
-                                std::cout << "enemy: " << enemies[second_choice].name << " defeated\n";
-                                enemydefeated = true;
-                                for (int j = 0; j < players_size; j++) {
-                                    players[j].set_experience_entity(enemies[second_choice].get_experience());
-                                    players[j].set_experience_class(enemies[second_choice].get_experience_class());
-                                    actualize_speed(players, enemies);
-                                }
-                                remove(players, enemies, second_choice);
-                                enemydefeated = false;
-                            }
+                            If_dead(players, enemies, second_choice, 0); //if enemy is dead
                         }
+                            
                         if (second_choice >= enemies_size && second_choice < combat_size) { //attack player
                             int min = combat_size - second_choice - 1;
                             std::cout << min;
 
                             players[min].take_damage(players[position].act_stats.get_stat_value(2), aux);
 
-
-                            if (players[min].act_stats.get_stat_value(0) == 0) {// player is dead
-                                std::cout << "player: " << players[min].name << " defeated\n";
-                                playerdefeated = true;
-                                remove(players, enemies, min);
-                                playerdefeated = false;
-                            }
+                            If_dead(players, enemies, min, 1); //if player is dead
                         }
                         break;
+                            
                     case 2:// ability for primal class
-                        std::cout << "choose ability\n\n";
+                        select_ability(players, second_choice, 0, valid); //select ability point_ro= point_role
 
-                        for (int i = 0; i < players[position].get_roles(0).get_size(); i++)
-                            //if (players[position].act_stats.get_stat_value(1) < players[position].roles[players[position].point_role[0]].get_ability(i).get_consume())
-                            std::cout << "(" << i << ")  " << players[position].roles[players[position].point_role[0]].get_ability(i).get_name() << " cost: " << players[position].roles[players[position].point_role[0]].get_ability(i).get_consume() << "\n";
-                        while (valid == false) {
-                            std::cin >> second_choice;
-                            if (players[position].act_stats.get_stat_value(1) < players[position].roles[players[position].point_role[0]].get_ability(second_choice).get_consume())
-                                std::cout << "not enough magic points\n";
-                            else
-                                valid = true;
-
-                        }
-
-                        std::cout << "choose the objetive\n";
-                        for (int i = 0; i < enemies_size; i++) {
-                            std::cout << "(" << i << ")" << "enemy: " << enemies[i].name << "\n";
-                        }
-                        for (int j = enemies_size; j < combat_size; j++) {
-                            std::cout << "(" << j << ")" << "player: " << players[combat_size - j - 1].name << "\n";
-                        }
-                        std::cout << "(" << combat_size << ")back:" << "\n";
-                        std::cin >> third_choice;
+                        sshow_targets(players, enemies, third_choice); //targets
+                            
                         if (third_choice < enemies_size) {
                             players[position].rest_mp(second_choice, 0);
                             if (players[position].get_fisical_magical(second_choice, 0) == true)
@@ -2585,19 +2597,10 @@ namespace rpg
                             if (players[position].get_fisical_magical(second_choice, 0) == false)
                                 enemies[third_choice].take_damage(players[position].act_stats.get_stat_value(4), players[position].roles[players[position].point_role[0]].get_ability(second_choice), table, players[position].get_wep_f());
 
-                            if (enemies[third_choice].act_statdistic.get_stat_value(0) == 0) { //if enemy is dead
-                                std::cout << "enemy: " << enemies[third_choice].name << " defeated\n";
-                                enemydefeated = true;
-                                for (int j = 0; j < players_size; j++) {
-                                    players[j].set_experience_entity(enemies[third_choice].get_experience());
-                                    players[j].set_experience_class(enemies[third_choice].get_experience_class());
-                                    actualize_speed(players, enemies);
-
-                                }
-                                remove(players, enemies, third_choice);
-                                enemydefeated = false;
-                            }
+                            If_dead(players, enemies, third_choice, 0); //if enemy is dead
+                            
                         }
+                            
                         else if (third_choice >= enemies_size && third_choice < combat_size) { //attack player
                             players[position].rest_mp(second_choice, 0);
                             int min = combat_size - third_choice - 1;
@@ -2607,36 +2610,35 @@ namespace rpg
                             if (players[position].get_fisical_magical(second_choice, 0) == false)
                                 players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[0]].get_ability(second_choice));
                             players[min].buff_debuff();
-                            if (players[min].act_stats.get_stat_value(0) == 0) {// player is dead
-                                std::cout << "player: " << players[min].name << " defeated\n";
-                                playerdefeated = true;
-                                remove(players, enemies, min);
-                                playerdefeated = false;
-                            }
+                            
+                            If_dead(players, enemies, min, 1); //if player is dead
                         }
 
+                        if(third_choice >=combat_size && third_choice < const_size){ //for revive a player
+                            //it need to be fixed
+                            players[position].rest_mp(second_choice, 0);
+                            int min = (players_size-1)+(const_size-third_choice);
+                            std::cout << min;
+                            if (players[position].get_fisical_magical(second_choice, 0) == true)
+                                players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[0]].get_ability(second_choice));
+                            if (players[position].get_fisical_magical(second_choice, 0) == false)
+                                players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[0]].get_ability(second_choice));
+                            players[min].buff_debuff();
+                            //
+
+                            if(players[min].act_stats.get_stat_value(0) >= 0){ //revive
+                                std::cout<<"return to combat: "<<players[min].name<<"\n"; 
+                                combat_size++;
+                                players_size++;
+                                sort_speed();
+                            }
+                        }    
                         break;
                     case 3://atack with second class
-                        std::cout << "choose ability\n\n";
-                        for (int i = 0; i < players[position].get_roles(0).get_size(); i++)
-                            //if (players[position].act_stats.get_stat_value(1) < players[position].roles[players[position].point_role[1]].get_ability(i).get_consume())
-                            std::cout << "(" << i << ")  " << players[position].roles[players[position].point_role[1]].get_ability(i).get_name() << " cost:  " << players[position].roles[players[position].point_role[1]].get_ability(i).get_consume() << "\n";
-                        while (valid == false) {
-                            std::cin >> second_choice;
-                            if (players[position].act_stats.get_stat_value(1) < players[position].roles[players[position].point_role[1]].get_ability(second_choice).get_consume())
-                                std::cout << "not enough magic points\n";
-                            else
-                                valid = true;
-                        }
-                        std::cout << "choose the objetive\n";
-                        for (int i = 0; i < enemies_size; i++) {
-                            std::cout << "(" << i << ")" << "enemy: " << enemies[i].name << "\n";
-                        }
-                        for (int j = enemies_size; j < combat_size; j++) {
-                            std::cout << "(" << j << ")" << "player: " << players[combat_size - j - 1].name << "\n";
-                        }
-                        std::cout << "(" << combat_size << ")back:" << "\n";
-                        std::cin >> third_choice;
+                        select_ability(players, second_choice, 1, valid); //select ability point_ro= point_role
+                        
+                        show_targets(players, enemies, third_choice);//targets
+                            
                         if (third_choice < enemies_size) {
                             players[position].rest_mp(second_choice, 1);
                             if (players[position].get_fisical_magical(second_choice, 1) == true)
@@ -2644,18 +2646,9 @@ namespace rpg
                             if (players[position].get_fisical_magical(second_choice, 1) == false)
                                 enemies[third_choice].take_damage(players[position].act_stats.get_stat_value(4), players[position].roles[players[position].point_role[1]].get_ability(second_choice), table, players[position].get_wep_f());
 
-                            if (enemies[third_choice].act_statdistic.get_stat_value(0) == 0) { //if enemy is dead
-                                std::cout << "enemy: " << enemies[third_choice].name << " defeated\n";
-                                enemydefeated = true;
-                                for (int j = 0; j < players_size; j++) {
-                                    players[j].set_experience_entity(enemies[third_choice].get_experience());
-                                    players[j].set_experience_class(enemies[third_choice].get_experience_class());
-                                    actualize_speed(players, enemies);
-                                }
-                                remove(players, enemies, third_choice);
-                                enemydefeated = false;
-                            }
+                            If_dead(players, enemies, third_choice, 0); //if enemy is dead
                         }
+                            
                         if (third_choice >= enemies_size && third_choice < combat_size) { //attack player
                             players[position].rest_mp(second_choice, 1);
                             int min = combat_size - third_choice - 1;
@@ -2665,70 +2658,45 @@ namespace rpg
                             if (players[position].get_fisical_magical(second_choice, 1) == false)
                                 players[min].take_damage(players[position].act_stats.get_stat_value(2), players[position].roles[players[position].point_role[1]].get_ability(second_choice));
                             players[min].buff_debuff();
-                            if (players[min].act_stats.get_stat_value(0) == 0) {// player is dead
-                                std::cout << "player: " << players[min].name << " defeated\n";
-                                playerdefeated = true;
-                                remove(players, enemies, min);
-                                playerdefeated = false;
-                            }
+                            
+                            If_dead(players, enemies, min, 1); //if player is dead
                         }
 
-                        break;
-                    case 4://escape
-                        escape = true;
-                        break;
-                    
-                    case 5://defend
+                        break;     
+                    case 4://defend
                         id_defend = players[position].get_name();
                         players[position].act_stats.set_v_value(2, players[position].act_stats.get_stat_value(2) * 2);
                         std::cout << players[position].get_name() << " defends\n";
                         break;
-                    case 6://show stats
+                    case 5://show stats
                         std::cout << players[position].get_name() << "\n";
                         players[position].act_stats.show_data();
                         players[position].act_stats.show_state();
                         choice = -1;
                         break;
-                    case 7:
+                    case 6:
                         std::cout << "select item\n\n";
                         inven.show_con();
                         std::cin >> second_choice;
-                        std::cout << "choose the objetive\n";
-                        for (int i = 0; i < enemies_size; i++) {
-                            std::cout << "(" << i << ")" << "enemy: " << enemies[i].name << "\n";
-                        }
-                        for (int j = enemies_size; j < combat_size; j++) {
-                            std::cout << "(" << j << ")" << "player: " << players[combat_size - j - 1].name << "\n";
-                        }
-                        std::cout << "(" << combat_size << ")back:" << "\n";
-                        std::cin >> third_choice;
+                        
+                        show_targets(players, enemies, third_choice);//targets
+                            
                         if (third_choice < enemies_size && third_choice >0) {
                             inven.use_item_enemy(second_choice, enemies[third_choice], table);
-                            if (enemies[third_choice].act_statdistic.get_stat_value(0) == 0) { //if enemy is dead
-                                std::cout << "enemy: " << enemies[third_choice].name << " defeated\n";
-                                enemydefeated = true;
-                                for (int j = 0; j < players_size; j++) {
-                                    players[j].set_experience_entity(enemies[third_choice].get_experience());
-                                    players[j].set_experience_class(enemies[third_choice].get_experience_class());
-                                    actualize_speed(players, enemies);
-                                }
-                                remove(players, enemies, third_choice);
-                                enemydefeated = false;
-                            }
+                            
+                            If_dead(players, enemies, third_choice, 0); //if enemy is dead
                         }
                         else if (third_choice >= enemies_size && third_choice < combat_size)
                         {
                             int min = combat_size - third_choice - 1;
                             inven.use_item(second_choice, players[min]);
-                            if (players[min].act_stats.get_stat_value(0) == 0) {// player is dead
-                                std::cout << "player: " << players[min].name << " defeated\n";
-                                playerdefeated = true;
-                                remove(players, enemies, min);
-                                playerdefeated = false;
-                            }
+                            
+                            If_dead(players, enemies, min, 1); //if player is dead
                         }
-                        else if (third_choice == 0)
-                            choice = -1;
+                    
+                    case 7://escape
+                        escape = true;
+                        break;
                     }
                 } while (choice == -1 && enemies_size != 0);
                 players[position].buff_debuff();
@@ -2773,12 +2741,9 @@ namespace rpg
                     else
                         std::cout << "insuficient mp\n";
                 }
-                if (players[order].act_stats.get_stat_value(0) == 0) {// player is dead
-                    std::cout << "player: " << players[order].name << " defeated\n";
-                    playerdefeated = true;
-                    remove(players, enemies, order);
-                    playerdefeated = false;
-                }
+                
+                If_dead(players, enemies, order, 1); //if player is dead
+                
                 enemies[position].buff_debuff();
                 enemies[position].turn_state_minus();
 
@@ -2831,17 +2796,21 @@ namespace rpg
             }
     }
     void Combat::remove(character players[], enemy enemies[], int n) { //remove a player or enemy
-        int sped = 0;
-        std::string sped2;
+        int sped = 0, x=0;
+        std::string sped2, y;
+        character p2;
+        enemy p3;
         if (enemydefeated) {
             for (int i = 0; i < enemies_size; i++) //arary of enemies
                 if (i == n) {
                     sped = enemies[i].act_statdistic.get_stat_value(6);
                     sped2 = enemies[i].name;
+                    p3=enemies[i];
                     for (int j = i; j < enemies_size - 1; j++)
                         enemies[j] = enemies[j + 1];
                 }
-
+            enemies[enemies_size-1]=p3;
+            
             for (int k = 0; k < combat_size; k++) //array of turns
                 if (turn[k] == sped && n_turn[k] == sped2)
                     for (int l = k; l < combat_size - 1; l++) {
@@ -2850,6 +2819,7 @@ namespace rpg
                     }
             enemies_size--;
             combat_size--;
+            const_size--;
 
         }
         if (playerdefeated) {
@@ -2857,16 +2827,20 @@ namespace rpg
                 if (i == n) {
                     sped = players[i].act_stats.get_stat_value(6);
                     sped2 = players[i].name;
+                    p2=players[i];
                     for (int j = i; j < players_size - 1; j++)
                         players[j] = players[j + 1];
                 }
-
+            players[players_size-1]=p2;
+            
             for (int k = 0; k < combat_size; k++)//array of turns
                 if (turn[k] == sped && n_turn[k] == sped2)
                     for (int l = k; l < combat_size - 1; l++) {
                         turn[l] = turn[l + 1];
                         n_turn[l] = n_turn[l + 1];
                     }
+            turn[combat_size-1]=x; //put at the end of the array
+			n_turn[combat_size-1]=y;
             players_size--;
             combat_size--;
         }
