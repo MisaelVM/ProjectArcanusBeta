@@ -13,28 +13,30 @@ private:
 	Player() {};
 
 	// -- INSTANCE -- SINGLETON PATTERN --
-	static Player *player_instance;
+	static Player* player_instance;
 
 public:
 	// -- INSTANCE GETTER -- SINGLETON PATTERN --
-	static Player *getInstance();
+	static Player* getInstance();
+
+	static void deleteInstance();
 
 	// -- DELETED COPY CONSTRUCTOR AND ASSIGNMENT OPERATOR -- SINGLETON PATTERN --
-	Player(const Player &o) = delete;
-	Player &operator = (const Player &o) = delete;	
+	Player(const Player& o) = delete;
+	Player& operator = (const Player& o) = delete;
 
 	// Functions
 	void refresh(const float x, const float y, sf::Texture& sfTexture);
 
-	void setPlayerInput(const sf::Vector2f &velocity, const sf::Vector2i &last);
+	void setPlayerInput(const sf::Vector2f& velocity, const sf::Vector2i& last);
 	void setVelocity(const float x, const float y);
 
 	sf::Vector2f getVelocitySense() const;
 	sf::Vector2i getLastSense() const;
 
 	// Main functions
-	void update(const float &fElapsedTime);
-	void draw(sf::RenderTarget *sfTarget);
-	
+	void update(const float& fElapsedTime);
+	void draw(sf::RenderTarget* sfTarget);
+
 	// sf::Vector2f GetHitboxPosition();
 };

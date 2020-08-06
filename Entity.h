@@ -9,12 +9,12 @@
 
 class Entity {
 private:
-	
+
 protected:
-	sf::Texture *sfTexture; // Image that will be mapped to a 2D Entity
+	sf::Texture* sfTexture; // Image that will be mapped to a 2D Entity
 	sf::Sprite sfSprite; // Texturized Entity
 	sf::RectangleShape hitbox;
-	AnimatorSystem *animatorSystem; // Entity's Animator
+	AnimatorSystem* animatorSystem; // Entity's Animator
 
 	// Variables
 	float fMovementSpeed;
@@ -22,8 +22,8 @@ protected:
 	bool bInCinematic;
 
 	// Constructor's functions
-	void constructSprite(sf::Texture *_sfTexture); // Constructs the Sprite using the Texture
-	void constructAnimatorSystem(sf::Texture &sfTextureSheet); // Constructs the Animator
+	void constructSprite(sf::Texture* _sfTexture); // Constructs the Sprite using the Texture
+	void constructAnimatorSystem(sf::Texture& sfTextureSheet); // Constructs the Animator
 
 public:
 	// -- CONSTRUCTOR/DESTRUCTOR --
@@ -44,14 +44,13 @@ public:
 	// Functions
 	float getMovementSpeed() const;
 
-	virtual void move(const float towardsX, const float towardsY, const float &fElapsedTime); // Moves our Entity
+	virtual void move(const float towardsX, const float towardsY, const float& fElapsedTime); // Moves our Entity
 	virtual void setVelocity(const float x, const float y) = 0;
 
 	// Main Functions
-	virtual void update(const float &fElapsedTime) = 0; // Updates our Entity's data
-	virtual void draw(sf::RenderTarget *sfTarget) = 0; // Draws our Entity
+	virtual void update(const float& fElapsedTime) = 0; // Updates our Entity's data
+	virtual void draw(sf::RenderTarget* sfTarget) = 0; // Draws our Entity
 
 	// sf::Vector2f GetPosition();
 	// Collider GetCollider() {return Collider(hitbox);}
 };
-

@@ -21,9 +21,17 @@ void Button::setTextSize(int s)
 {
 	this->txt->setCharacterSize(s);
 }
+void Button::setTextColor(sf::Color color)
+{
+	this->txt->setFillColor(color);
+}
 sf::RectangleShape* Button::getRectangle()
 {
 	return this->button;
+}
+std::string Button::getText() const
+{
+	return txt->getString();
 }
 bool Button::GetClick(const int pos_mousex, const int pos_mousey, sf::View& camera)
 {

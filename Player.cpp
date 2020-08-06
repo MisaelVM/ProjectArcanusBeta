@@ -1,10 +1,15 @@
 #include "Player.h"
 
 // -- INSTANCE GETTER -- SINGLETON PATTERN --
-Player *Player::getInstance() {
+Player* Player::getInstance() {
 	if (player_instance == nullptr)
 		player_instance = new Player();
 	return player_instance;
+}
+
+void Player::deleteInstance() {
+	delete player_instance;
+	player_instance = nullptr;
 }
 
 void Player::refresh(const float x, const float y, sf::Texture& sfTexture) {
@@ -40,14 +45,6 @@ void Player::refresh(const float x, const float y, sf::Texture& sfTexture) {
 //Main functions
 
 void Player::update(const float& fElapsedTime) {
-	/*vfVelocitySense.x = 0.f; vfVelocitySense.y = 0.f;
-
-	// Checks what keys are being pressed so it can move our Entity
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) { vfVelocitySense.x = -1.f; viLastSense.x = -1; viLastSense.y = 0; }
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) { vfVelocitySense.x = 1.f; viLastSense.x = 1; viLastSense.y = 0; }
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { vfVelocitySense.y = -1.f; viLastSense.x = 0; viLastSense.y = -1; }
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) { vfVelocitySense.y = 1.f; viLastSense.x = 0; viLastSense.y = 1; }*/
-
 	// Plays the animation
 	if (vfVelocitySense.x == 0.f && vfVelocitySense.y == 0.f) {
 		if (viLastSense.x == 1) animatorSystem->playAnimation("IDLE_RIGHT", fElapsedTime);
@@ -74,14 +71,8 @@ void Player::update(const float& fElapsedTime) {
 		// Moves the Entity
 		move(vfVelocitySense.x, vfVelocitySense.y, fElapsedTime);
 	bInCinematic = false;
-	// sf::Vector2f thisposition = hitbox.getPosition();
-	// this->setPosition(thisposition.x - 17.5f, thisposition.y - 15.5f);
-	
-	//move(vfVelocitySense.x, vfVelocitySense.y, fElapsedTime);
-	//sf::Vector2f thisposition = hitbox.getPosition();
-	//this->setPosition(thisposition.x - 17.5f, thisposition.y - 15.5f);
 }
-void Player::draw(sf::RenderTarget *sfTarget) { // Draws our Entity
+void Player::draw(sf::RenderTarget* sfTarget) { // Draws our Entity
 	sfTarget->draw(sfSprite);
 }
 

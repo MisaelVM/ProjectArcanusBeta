@@ -4,7 +4,7 @@ LevelScene::LevelScene(const std::string _sSceneName, const std::string _sNextSc
 	const std::string sceneTextures[], const int nTextures, const std::map<std::string, sf::Texture> sourceTextures,
 	sf::Music& sceneMusic,
 	const float playerPosX, const float playerPosY, const std::string playerTexture,
-	const int rows, const int columns, const std::string textureArchive, const char *tilemapArchive)
+	const int rows, const int columns, const std::string textureArchive, const char* tilemapArchive)
 	: sfMusic(sceneMusic) {
 	bSceneEnd = false;
 	sNextScene = _sNextScene;
@@ -23,10 +23,12 @@ LevelScene::LevelScene(const std::string _sSceneName, const std::string _sNextSc
 
 	player = Player::getInstance();
 	player->refresh(playerPosX, playerPosY, mSceneResourceTextures[playerTexture]);
+
+	dialogDisplayer = new DialogDisplayer("Sample text");
 }
 
 LevelScene::~LevelScene() {
-	delete player;
+	delete dialogDisplayer;
 	delete sceneMap;
 	delete camera;
 }
@@ -35,18 +37,19 @@ char LevelScene::getCollision(const float x, const float y) {
 	return sceneMap->GetChar(y / 35, x / 35);
 }
 
-const bool LevelScene::checkCollision(const char &tile) const {
-	return (tile == '"') || (tile == '$') /*|| (tile == '#')*/
+const bool LevelScene::checkCollision(const char& tile) const {
+	return (tile == '"') || (tile == '$')
 		|| (tile == 'p') || (tile == 'm') || (tile == 'j') || (tile == 'k') || (tile == 'l') || (tile == 'o') || (tile == 'r')
 		|| (tile == 'G') || (tile == 'R') || (tile == 'L');
 }
 
-void LevelScene::checkTrigger(const char &tile) {
+void LevelScene::checkTrigger(const char& tile) {
 	switch (tile) {
 	case 'n':
-		bSceneEnd = true;
-		sfMusic.stop();
-		// sNextLevel = "LEVEL_2";
+		startingPosX = player->getPosition().x;
+		startingPosY = player->getPosition().y;
+		startingPosY += 10;
+		end();
 		break;
 	}
 }
@@ -72,7 +75,7 @@ void LevelScene::checkcamera() {
 		camera->setCenter(player->getPosition());
 }
 
-void LevelScene::getPlayerInput(bool input[4], const float &fElapsedTime) {
+void LevelScene::getPlayerInput(bool input[4], const float& fElapsedTime) {
 	sf::Vector2f vfVelocitySense(0, 0);
 	sf::Vector2i viLastSense = player->getLastSense();
 	float playerSpeed = player->getMovementSpeed();
@@ -86,17 +89,12 @@ void LevelScene::getPlayerInput(bool input[4], const float &fElapsedTime) {
 	// --- COLLISIONS REQUIRE SOME FIXING! ---
 	if (vfNewVelocitySense.x <= 0) {
 		if (checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x, player->getHitboxPosition().y)) || checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x, player->getHitboxPosition().y + 0.9f * 35.f))) {
-			//vfNewVelocitySense.x = ceil(vfNewVelocitySense.x) + 25.f;
-			//vfNewVelocitySense.x = 0.f;
 			vfVelocitySense.x = 0.f;
-			//player->setPosition((player->getPosition().x) + 1.f, (player->getPosition().y) + 1.f);
 			std::cout << "CollisionLeft\n";
 		}
 	}
 	else {
 		if (checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x + 20.f, player->getHitboxPosition().y)) || checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x + 20.f, player->getHitboxPosition().y + 0.9f * 35.f))) {
-			//vfNewVelocitySense.x = floor(vfNewVelocitySense.x);
-			//vfNewVelocitySense.x = 0.f;
 			vfVelocitySense.x = 0.f;
 			std::cout << "CollisionRight\n";
 		}
@@ -104,16 +102,12 @@ void LevelScene::getPlayerInput(bool input[4], const float &fElapsedTime) {
 	//
 	if (vfNewVelocitySense.y <= 0) {
 		if (checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x, player->getHitboxPosition().y + vfNewVelocitySense.y)) || checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x + 0.9f * 20.f, player->getHitboxPosition().y + vfNewVelocitySense.y))) {
-			//vfNewVelocitySense.y = floor(vfNewVelocitySense.y) + 35.f;
-			//vfNewVelocitySense.y = 0.f;
 			vfVelocitySense.y = 0.f;
 			std::cout << "CollisionUp\n";
 		}
 	}
 	else {
 		if (checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x, player->getHitboxPosition().y + vfNewVelocitySense.y + 35.f)) || checkCollision(getCollision(player->getHitboxPosition().x + vfNewVelocitySense.x + 0.9f * 20.f, player->getHitboxPosition().y + vfNewVelocitySense.y + 35.f))) {
-			//vfNewVelocitySense.y = floor(vfNewVelocitySense.y);
-			//vfNewVelocitySense.y = 0.f;
 			vfVelocitySense.y = 0.f;
 			std::cout << "CollisionDown\n";
 		}
@@ -139,7 +133,28 @@ const bool LevelScene::getEnd() const {
 	return bSceneEnd;
 }
 
-void LevelScene::update(const float &fElapsedTime) {
+void LevelScene::update(const float& fElapsedTime) {
+	cutscene.processCommand(fElapsedTime);
+
+	bEnabledInput = cutscene.UserInputEnabled();
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && bEnabledInput) {
+		cutscene.addCommand(new MoveCommand(player, 1000, 1000, 3.f));
+		cutscene.addCommand(new MoveCommand(player, 1500, 1000, 3.f));
+		cutscene.addCommand(new DialogCommand("Hola hola", dialogDisplayer));
+		cutscene.addCommand(new DialogCommand("Probando\nProbando", dialogDisplayer));
+		cutscene.addCommand(new MoveCommand(player, 1500, 1500, 3.f));
+		cutscene.addCommand(new DialogCommand("Random dialogue 1", dialogDisplayer));
+		cutscene.addCommand(new DialogCommand("Testing commands", dialogDisplayer));
+		cutscene.addCommand(new MoveCommand(player, 1000, 1000, 3.f));
+		cutscene.addCommand(new DialogCommand("Final command", dialogDisplayer));
+	}
+	else {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z) && dialogDisplayer->checkShowing()) {
+			dialogDisplayer->dontShow();
+		}
+	}
+
 	player->update(fElapsedTime);
 	checkcamera();// Set of camera position by the player position
 }
@@ -149,11 +164,17 @@ void LevelScene::awake() {
 	sfMusic.play();
 	sfMusic.setLoop(true);
 	sfMusic.setVolume(50.f);
-	player->setPosition(1000, 1000);
+	player->setPosition(startingPosX, startingPosY);
 }
 
-void LevelScene::draw(sf::RenderTarget *sfTarget) {
+void LevelScene::end() {
+	bSceneEnd = true;
+	sfMusic.stop();
+}
+
+void LevelScene::draw(sf::RenderTarget* sfTarget) {
 	sceneMap->Displaytilemap(sfTarget, camera->getCenter());
 	player->draw(sfTarget);
+	dialogDisplayer->display(sfTarget, camera->getCenter().x, camera->getCenter().y);
 	sfTarget->setView(*camera);
 }

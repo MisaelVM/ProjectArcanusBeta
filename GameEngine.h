@@ -4,13 +4,14 @@
 
 class GameEngine {
 private:
-	sf::RenderWindow *sfWindow;
+	sf::Image* sfImage;
+	sf::RenderWindow* sfWindow;
 	sf::Event sfEvent;
 
 	sf::Clock sfElapsedTimeClock;
 	float fElapsedTime; // aka Delta Time
 
-	GameState *gameState;
+	GameState* gameState;
 
 	std::map<std::string, sf::Keyboard::Key> mGameInput;
 
@@ -19,8 +20,8 @@ private:
 	void constructInput();
 
 	// Private Functions
-	void editWindow();
-	void editInput();
+	void checkCloseGame();
+	void checkChangedSettings();
 
 public:
 	// -- CONSTRUCTOR/DESTRUCTOR --

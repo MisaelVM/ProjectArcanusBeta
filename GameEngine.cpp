@@ -1,4 +1,5 @@
 #include "GameEngine.h"
+
 GameEngine::GameEngine() { // Class' Constructor - Calls its functions
     constructWindow();
     constructInput();
@@ -7,6 +8,7 @@ GameEngine::GameEngine() { // Class' Constructor - Calls its functions
 
 GameEngine::~GameEngine() { // Class' Destructor - Clears memory
     delete gameState;
+    delete sfImage;
     delete sfWindow;
 }
 
@@ -36,6 +38,10 @@ void GameEngine::constructWindow() { // Constructs game's window and initializes
     sfWindow = new sf::RenderWindow(windowSize, windowTitle);
     sfWindow->setFramerateLimit(framerateLimit);
     sfWindow->setVerticalSyncEnabled(verticalSyncEnabled);
+
+    sfImage = new sf::Image;
+    sfImage->loadFromFile("Resources/THQ.png");
+    sfWindow->setIcon(256, 256, sfImage->getPixelsPtr());
 }
 
 void GameEngine::constructInput() {
@@ -62,71 +68,16 @@ void GameEngine::constructInput() {
 }
 
 // Private Functions
-void GameEngine::editWindow() {
-    int input;
-
-    // Config variables
-    std::string resolution;
-    std::string framerateLimit;
-    std::string verticalSync;
-
-    // Window resolution
-    std::string window_resolutions[] =
-    { "640 480", "800 600", "960 720", "1280 720", "1366 768", "1600 900", "1920 1080", "2560 1440", "3840 2160" };
-
-    std::cout << "Choose resolution:\n";
-    for (int i = 0; i < 9; i++)
-        std::cout << i + 1 << ") " << window_resolutions[i] << "\n";
-    std::cin >> input;
-    resolution = window_resolutions[input - 1];
-
-    // Framerate Limit
-    std::string framerate_limits[] =
-    { "30", "40", "50", "60", "100", "120", "144", "0" };
-    std::cout << "Choose framerate limit:\n";
-    for (int i = 0; i < 8 - 1; i++)
-        std::cout << i + 1 << ") " << framerate_limits[i] << "\n";
-    std::cout << "8) Unlimited\n";
-    std::cin >> input;
-    framerateLimit = framerate_limits[input - 1];
-
-    // Vertical sync
-    std::cout << "Enable Vertical Sync?:\n";
-    std::cin >> input;
-    input ? verticalSync = "1" : verticalSync = "0";
-
-    // Saves configuration
-    std::ofstream newConfiguration("Resources/BaseWindow.ini", std::ofstream::trunc);
-    if (newConfiguration.is_open()) {
-        newConfiguration << "[GameEngine.sfWindow]\n";
-        newConfiguration << "windowTitle=TheHolyQuest\n";
-        newConfiguration << "windowSize=" << resolution << "\n";
-        newConfiguration << "framerateLimit=" << framerateLimit << "\n";
-        newConfiguration << "verticalSyncEnabled=" << verticalSync << "\n";
+void GameEngine::checkCloseGame() {
+    if (!gameState->stillOpen()) {
+        Player::deleteInstance();
+        sfWindow->close();
     }
-    newConfiguration.close();
 }
 
-void GameEngine::editInput() {
-    std::string escape;
-    std::string move_up;
-    std::string move_down;
-    std::string move_left;
-    std::string move_right;
-
-    std::cin >> escape >> move_up >> move_down >> move_left >> move_right;
-
-    std::ofstream newInputConfiguration("Resources/BaseInput.ini", std::ofstream::trunc);
-    if (newInputConfiguration.is_open()) {
-        newInputConfiguration << "[GameEngine.gameInput]\n";
-        newInputConfiguration << "ESCAPE=" << escape << "\n";
-        newInputConfiguration << "MOVE_UP=" << move_up << "\n";
-        newInputConfiguration << "MOVE_DOWN=" << move_down << "\n";
-        newInputConfiguration << "MOVE_LEFT=" << move_left << "\n";
-        newInputConfiguration << "MOVE_RIGHT=" << move_right << "\n";
-    }
-    newInputConfiguration.close();
-    constructInput();
+void GameEngine::checkChangedSettings() {
+    if (gameState->checkNewSettings())
+        constructInput();
 }
 
 // Main Functions - for handling our game
@@ -142,10 +93,11 @@ void GameEngine::updateEvents() {
         if (sfEvent.type == sf::Event::Closed) {
             sfWindow->close();
         }
-        /*if (sfEvent.type == sf::Event::MouseWheelMoved)
-        {
-            camera->zoom(1.f + sfEvent.mouseWheel.delta * 0.1f);
-        }*/
+        if (sfEvent.type == sf::Event::MouseButtonReleased) {
+            sf::Vector2i mouse_pos;
+            mouse_pos = sf::Mouse::getPosition(*sfWindow);
+            gameState->checkClick(mouse_pos);
+        }
     }
 }
 
@@ -153,16 +105,19 @@ void GameEngine::update() { // Updates data in general
     updateElapsedTime(); // Always updating the Elapsed Time
     updateEvents();
     checkUserInput();
+    checkCloseGame();
     gameState->update(fElapsedTime);
+    checkChangedSettings();
+
 }
 
 void GameEngine::draw() { // Draws Items 
     sfWindow->clear();
-    
+
     //camera->setCenter(player->GetPosition());
     gameState->draw(sfWindow);
     sfWindow->display();
-   
+
 }
 
 void GameEngine::updateElapsedTime() { // Updates the value of the Elapsed Time
@@ -184,9 +139,6 @@ void GameEngine::checkUserInput() {
             if (sf::Keyboard::isKeyPressed(mGameInput["MOVE_DOWN"])) playerInput[3] = true;
             // // player->setPlayerInput(playerHotkeys);
             gameState->getInput(playerInput, fElapsedTime);
-
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) { editWindow(); }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) { editInput(); }
         }
 
         if (sf::Keyboard::isKeyPressed(mGameInput["ESCAPE"]))

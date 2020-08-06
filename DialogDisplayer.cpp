@@ -14,6 +14,10 @@ DialogDisplayer::DialogDisplayer(std::string dialog) {
 	box.setFillColor(sf::Color::Yellow);
 }
 
+DialogDisplayer::~DialogDisplayer() {
+	delete sfFont;
+}
+
 const bool DialogDisplayer::checkShowing() const {
 	return bShowingDialog;
 }
@@ -26,11 +30,11 @@ void DialogDisplayer::dontShow() {
 	bShowingDialog = false;
 }
 
-void DialogDisplayer::changeText(const std::string &newText) {
+void DialogDisplayer::changeText(const std::string& newText) {
 	sfText.setString(newText);
 }
 
-void DialogDisplayer::display(sf::RenderTarget *sfTarget, float x, float y) {
+void DialogDisplayer::display(sf::RenderTarget* sfTarget, float x, float y) {
 	if (bShowingDialog) {
 		sfText.setPosition(sf::Vector2f(x - 370, y + 130));
 		box.setPosition(sf::Vector2f(x - 375, y + 125));
