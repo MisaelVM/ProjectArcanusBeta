@@ -36,8 +36,11 @@ public:
 	std::string getNextScene() const;
 	const bool getEnd() const;
 
+	void save(const float x = 0, const float y = 0);
+
 	void update(const float& fElapsedTime);
 	void awake();
 	void end();
+	void end(const float x, const float y);
 	void draw(sf::RenderTarget* sfTarget);
 };

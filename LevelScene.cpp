@@ -133,6 +133,11 @@ const bool LevelScene::getEnd() const {
 	return bSceneEnd;
 }
 
+void LevelScene::save(const float x, const float y) {
+	startingPosX = player->getPosition().x + x;
+	startingPosY = player->getPosition().y + y;
+}
+
 void LevelScene::update(const float& fElapsedTime) {
 	cutscene.processCommand(fElapsedTime);
 
@@ -168,8 +173,19 @@ void LevelScene::awake() {
 }
 
 void LevelScene::end() {
-	bSceneEnd = true;
-	sfMusic.stop();
+	if (!bSceneEnd) {
+		save();
+		bSceneEnd = true;
+		sfMusic.stop();
+	}
+}
+
+void LevelScene::end(const float x, const float y) {
+	if (!bSceneEnd) {
+		save(x, y);
+		bSceneEnd = true;
+		sfMusic.stop();
+	}
 }
 
 void LevelScene::draw(sf::RenderTarget* sfTarget) {
