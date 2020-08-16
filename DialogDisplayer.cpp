@@ -3,7 +3,7 @@
 DialogDisplayer::DialogDisplayer(std::string dialog) {
 	bShowingDialog = false;
 
-	sfFont = new sf::Font;
+	sfFont = std::make_unique<sf::Font>();
 	sfFont->loadFromFile("Resources/font1.ttf");
 
 	sfText.setFont(*sfFont);
@@ -12,10 +12,6 @@ DialogDisplayer::DialogDisplayer(std::string dialog) {
 
 	box = sf::RectangleShape(sf::Vector2f(750, 150));
 	box.setFillColor(sf::Color::Yellow);
-}
-
-DialogDisplayer::~DialogDisplayer() {
-	delete sfFont;
 }
 
 const bool DialogDisplayer::checkShowing() const {

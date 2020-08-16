@@ -6,14 +6,13 @@ class DialogDisplayer {
 private:
 	bool bShowingDialog;
 
-	sf::Font* sfFont;
+	std::unique_ptr<sf::Font> sfFont;
 	sf::Text sfText;
 
 	sf::RectangleShape box;
 
 public:
 	DialogDisplayer(std::string dialog);
-	virtual ~DialogDisplayer();
 
 	const bool checkShowing() const;
 

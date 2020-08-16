@@ -1,6 +1,6 @@
 #include "DialogCommand.h"
 
-DialogCommand::DialogCommand(const std::string &dialog, DialogDisplayer *dialogbox) {
+DialogCommand::DialogCommand(const std::string &dialog, std::shared_ptr<DialogDisplayer> dialogbox) {
 	dialogBox = dialogbox;
 	sDialog = dialog;
 }

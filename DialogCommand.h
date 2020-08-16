@@ -4,11 +4,11 @@
 
 class DialogCommand : public Command {
 private:
-	DialogDisplayer *dialogBox;
+	std::shared_ptr<DialogDisplayer> dialogBox;
 	std::string sDialog;
 
 public:
-	DialogCommand(const std::string &dialog, DialogDisplayer *dialogbox);
+	DialogCommand(const std::string &dialog, std::shared_ptr<DialogDisplayer> dialogbox);
 
 	void start();
 	void update(const float &fElapsedTime);

@@ -11,12 +11,12 @@ LevelScene::LevelScene(const std::string _sSceneName, const std::string _sNextSc
 
 	sSceneName = _sSceneName;
 
-	camera = new sf::View(sf::FloatRect(0, 0, 800, 600));
+	camera = std::make_unique<sf::View>(sf::FloatRect(0, 0, 800, 600));
 
 	for (int i = 0; i < nTextures; i++)
 		mSceneResourceTextures[sceneTextures[i]] = sourceTextures.at(sceneTextures[i]);
 
-	sceneMap = new TileMap(rows, columns, textureArchive, tilemapArchive);
+	sceneMap = std::make_unique<TileMap>(rows, columns, textureArchive, tilemapArchive);
 
 	startingPosX = playerPosX;
 	startingPosY = playerPosY;
@@ -24,13 +24,7 @@ LevelScene::LevelScene(const std::string _sSceneName, const std::string _sNextSc
 	player = Player::getInstance();
 	player->refresh(playerPosX, playerPosY, mSceneResourceTextures[playerTexture]);
 
-	dialogDisplayer = new DialogDisplayer("Sample text");
-}
-
-LevelScene::~LevelScene() {
-	delete dialogDisplayer;
-	delete sceneMap;
-	delete camera;
+	dialogDisplayer = std::make_shared<DialogDisplayer>("Sample text");
 }
 
 char LevelScene::getCollision(const float x, const float y) {

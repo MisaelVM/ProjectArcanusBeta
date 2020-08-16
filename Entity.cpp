@@ -9,17 +9,13 @@ Entity::Entity() { // Entity's Constructor - Initializes the shape
 	// hitbox.setOrigin(hitbox.getSize() / 2.0f);
 }
 
-Entity::~Entity() {
-	delete animatorSystem;
-}
-
 // Constructor's functions
 void Entity::constructSprite(sf::Texture *_sfTexture) { // Constructs the Sprite using the Texture
 	sfTexture = _sfTexture;
 }
 
 void Entity::constructAnimatorSystem(sf::Texture &sfTextureSheet) {  // Constructs the Animator
-	animatorSystem = new AnimatorSystem(sfSprite, sfTextureSheet);
+	animatorSystem = std::make_unique<AnimatorSystem>(sfSprite, sfTextureSheet);
 }
 
 //Transform

@@ -14,17 +14,12 @@ GameState::GameState() {
 
     std::string lvl1[] = { "ARIEL_SHEET" };
 
-    mGameScenes["MAIN_MENU"] = new MenuScene("MAIN_MENU", "LEVEL_2", mGameResourceMusic.at("TITLE_THEME"), "Resources/MainMenuScreen.jpg");
-    mGameScenes["PAUSE_MENU"] = new MenuScene("PAUSE_MENU", "LEVEL_1", mGameResourceMusic.at("PAUSE_THEME"), "Resources/PauseMenu.jpg");
-    mGameScenes["LEVEL_1"] = new LevelScene("LEVEL_1", "LEVEL_2", lvl1, 1, mGameResourceTextures, mGameResourceMusic.at("BACKGROUND_MUSIC"), 1000, 1000, "ARIEL_SHEET", 80, 120, "Resources/1LEVELEDIT.png", "Resources/Tilemap1.ini");
-    mGameScenes["LEVEL_2"] = new LevelScene("LEVEL_2", "LEVEL_1", lvl1, 1, mGameResourceTextures, mGameResourceMusic.at("BACKGROUND_MUSIC"), 1000, 1000, "ARIEL_SHEET", 80, 120, "Resources/1LEVELEDIT.png", "Resources/Tilemap2.ini");
+    mGameScenes["MAIN_MENU"] = std::make_shared<MenuScene>("MAIN_MENU", "LEVEL_2", mGameResourceMusic.at("TITLE_THEME"), "Resources/MainMenuScreen.jpg");
+    mGameScenes["PAUSE_MENU"] = std::make_shared<MenuScene>("PAUSE_MENU", "LEVEL_1", mGameResourceMusic.at("PAUSE_THEME"), "Resources/PauseMenu.jpg");
+    mGameScenes["LEVEL_1"] = std::make_shared<LevelScene>("LEVEL_1", "LEVEL_2", lvl1, 1, mGameResourceTextures, mGameResourceMusic.at("BACKGROUND_MUSIC"), 1000, 1000, "ARIEL_SHEET", 80, 120, "Resources/1LEVELEDIT.png", "Resources/Tilemap1.ini");
+    mGameScenes["LEVEL_2"] = std::make_shared<LevelScene>("LEVEL_2", "LEVEL_1", lvl1, 1, mGameResourceTextures, mGameResourceMusic.at("BACKGROUND_MUSIC"), 1000, 1000, "ARIEL_SHEET", 80, 120, "Resources/1LEVELEDIT.png", "Resources/Tilemap2.ini");
 
     currentScene = mGameScenes["MAIN_MENU"];
-}
-
-GameState::~GameState() {
-    for (auto& ref : mGameScenes)
-        delete ref.second;
 }
 
 // Functions

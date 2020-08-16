@@ -7,9 +7,9 @@ class MenuState;
 
 class MenuScene : public Scene {
 private:
-	sf::View* camera;
+	std::unique_ptr<sf::View> camera;
 
-	sf::Texture* screenTexture;
+	std::unique_ptr<sf::Texture> screenTexture;
 	sf::Sprite screenSprite;
 
 	sf::Music& sfMusic; // Game Music

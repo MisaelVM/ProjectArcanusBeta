@@ -5,8 +5,8 @@
 
 class GameState {
 private:
-	std::map<std::string, Scene*> mGameScenes;
-	Scene* currentScene;
+	std::map<std::string, std::shared_ptr<Scene>> mGameScenes;
+	std::shared_ptr<Scene> currentScene;
 
 	bool bGameOpen;
 	bool bSettingsChanged;
@@ -17,7 +17,6 @@ private:
 public:
 	// -- CONSTRUCTOR/DESTRUCTOR --
 	GameState();
-	virtual ~GameState();
 
 	// Functions
 	const bool stillOpen() const;

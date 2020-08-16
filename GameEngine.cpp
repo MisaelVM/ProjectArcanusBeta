@@ -3,12 +3,10 @@
 GameEngine::GameEngine() { // Class' Constructor - Calls its functions
     constructWindow();
     constructInput();
-    gameState = new GameState();
+    gameState = std::make_unique<GameState>();
 }
 
 GameEngine::~GameEngine() { // Class' Destructor - Clears memory
-    delete gameState;
-    delete sfImage;
     delete sfWindow;
 }
 
@@ -39,7 +37,7 @@ void GameEngine::constructWindow() { // Constructs game's window and initializes
     sfWindow->setFramerateLimit(framerateLimit);
     sfWindow->setVerticalSyncEnabled(verticalSyncEnabled);
 
-    sfImage = new sf::Image;
+    sfImage = std::make_unique<sf::Image>();
     sfImage->loadFromFile("Resources/THQ.png");
     sfWindow->setIcon(256, 256, sfImage->getPixelsPtr());
 }

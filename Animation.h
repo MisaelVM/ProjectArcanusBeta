@@ -3,6 +3,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <memory>
 
 #include "SFML/System.hpp"
 #include "SFML/Window.hpp"

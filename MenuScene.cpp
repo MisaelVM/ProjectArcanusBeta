@@ -9,9 +9,9 @@ MenuScene::MenuScene(const std::string _sSceneName, const std::string _sNextScen
 
 	sSceneName = _sSceneName;
 
-	camera = new sf::View(sf::FloatRect(0, 0, 800, 600));
+	camera = std::make_unique<sf::View>(sf::FloatRect(0, 0, 800, 600));
 
-	screenTexture = new sf::Texture;
+	screenTexture = std::make_unique<sf::Texture>();
 	screenTexture->loadFromFile(sceneTexture);
 	screenTexture->setSmooth(true);
 
@@ -31,8 +31,6 @@ MenuScene::MenuScene(const std::string _sSceneName, const std::string _sNextScen
 
 MenuScene::~MenuScene() {
 	delete state;
-	delete screenTexture;
-	delete camera;
 }
 
 void MenuScene::setState(MenuState* _state) {

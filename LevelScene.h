@@ -9,11 +9,11 @@ private:
 	float startingPosY;
 
 	Player* player;
-	TileMap* sceneMap;
-	sf::View* camera;
+	std::unique_ptr<TileMap> sceneMap;
+	std::unique_ptr<sf::View> camera;
 
 	Cutscene cutscene;
-	DialogDisplayer* dialogDisplayer;
+	std::shared_ptr<DialogDisplayer> dialogDisplayer;
 
 	sf::Music& sfMusic; // Game Music
 
@@ -24,7 +24,6 @@ public:
 		sf::Music& sceneMusic, // Initialize Music
 		const float playerPosX, const float playerPosY, const std::string playerTexture, // Initialize player
 		const int rows, const int columns, const std::string textureArchive, const char* tilemapArchive); // Initialize TileMap
-	virtual ~LevelScene();
 
 	char getCollision(const float x, const float y);
 	const bool checkCollision(const char& tile) const;

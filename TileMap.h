@@ -17,8 +17,8 @@ class TileMap {
 private:
 	//Esta parte tiene que ver con todo lo que es propio del SFML los sprites y texturas y un mapa de estas
 	std::map<std::string, sf::Sprite> ArrayTile;
-	sf::Texture *image;
-	sf::Sprite *Tile;
+	std::unique_ptr<sf::Texture> image;
+	std::unique_ptr<sf::Sprite> Tile;
 	// sf::RectangleShape *hitbox;
 	//Esta parte sera la Matriz de chars para interpretar el notepad
 	char **Mtile;

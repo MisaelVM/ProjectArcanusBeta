@@ -1,16 +1,10 @@
 #include "Button.h"
 Button::Button(std::string identidad, std::string font, float width, float height)
 {
-	this->button = new sf::RectangleShape(sf::Vector2f(width, height));
-	this->font = new sf::Font;
+	this->button = std::make_shared<sf::RectangleShape>(sf::Vector2f(width, height));
+	this->font = std::make_unique<sf::Font>();
 	this->font->loadFromFile("Resources/Fonts/" + font);
-	this->txt = new sf::Text(identidad, *this->font);
-}
-Button::~Button()
-{
-	delete button;
-	delete font;
-	delete txt;
+	this->txt = std::make_unique<sf::Text>(identidad, *this->font);
 }
 void Button::setButtonPosition(float x, float y)
 {
@@ -25,7 +19,7 @@ void Button::setTextColor(sf::Color color)
 {
 	this->txt->setFillColor(color);
 }
-sf::RectangleShape* Button::getRectangle()
+std::shared_ptr<sf::RectangleShape> Button::getRectangle()
 {
 	return this->button;
 }

@@ -14,7 +14,7 @@ protected:
 	sf::Texture* sfTexture; // Image that will be mapped to a 2D Entity
 	sf::Sprite sfSprite; // Texturized Entity
 	sf::RectangleShape hitbox;
-	AnimatorSystem* animatorSystem; // Entity's Animator
+	std::unique_ptr<AnimatorSystem> animatorSystem; // Entity's Animator
 
 	// Variables
 	float fMovementSpeed;
@@ -28,7 +28,6 @@ protected:
 public:
 	// -- CONSTRUCTOR/DESTRUCTOR --
 	Entity();
-	virtual ~Entity();
 
 	//Transform
 	virtual void setPosition(const float x, const float y);
