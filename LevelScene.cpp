@@ -7,6 +7,7 @@ LevelScene::LevelScene(const std::string _sSceneName, const std::string _sNextSc
 	const int rows, const int columns, const std::string textureArchive, const char* tilemapArchive)
 	: sfMusic(sceneMusic) {
 	bSceneEnd = false;
+	bCutscenePlayed = false;
 	sNextScene = _sNextScene;
 
 	sSceneName = _sSceneName;
@@ -44,6 +45,20 @@ void LevelScene::checkTrigger(const char& tile) {
 		startingPosY = player->getPosition().y;
 		startingPosY += 10;
 		end();
+		break;
+	case '+':
+		if (bEnabledInput && !bCutscenePlayed) {
+			cutscene.addCommand(new MoveCommand(player, 1000, 1000, 3.f));
+			cutscene.addCommand(new MoveCommand(player, 1500, 1000, 3.f));
+			cutscene.addCommand(new DialogCommand("Hola hola", dialogDisplayer));
+			cutscene.addCommand(new DialogCommand("Probando\nProbando", dialogDisplayer));
+			cutscene.addCommand(new MoveCommand(player, 1500, 1500, 3.f));
+			cutscene.addCommand(new DialogCommand("Random dialogue 1", dialogDisplayer));
+			cutscene.addCommand(new DialogCommand("Testing commands", dialogDisplayer));
+			cutscene.addCommand(new MoveCommand(player, 1000, 1000, 3.f));
+			cutscene.addCommand(new DialogCommand("Final command", dialogDisplayer));
+			bCutscenePlayed = true;
+		}
 		break;
 	}
 }
@@ -137,21 +152,8 @@ void LevelScene::update(const float& fElapsedTime) {
 
 	bEnabledInput = cutscene.UserInputEnabled();
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && bEnabledInput) {
-		cutscene.addCommand(new MoveCommand(player, 1000, 1000, 3.f));
-		cutscene.addCommand(new MoveCommand(player, 1500, 1000, 3.f));
-		cutscene.addCommand(new DialogCommand("Hola hola", dialogDisplayer));
-		cutscene.addCommand(new DialogCommand("Probando\nProbando", dialogDisplayer));
-		cutscene.addCommand(new MoveCommand(player, 1500, 1500, 3.f));
-		cutscene.addCommand(new DialogCommand("Random dialogue 1", dialogDisplayer));
-		cutscene.addCommand(new DialogCommand("Testing commands", dialogDisplayer));
-		cutscene.addCommand(new MoveCommand(player, 1000, 1000, 3.f));
-		cutscene.addCommand(new DialogCommand("Final command", dialogDisplayer));
-	}
-	else {
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z) && dialogDisplayer->checkShowing()) {
-			dialogDisplayer->dontShow();
-		}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z) && dialogDisplayer->checkShowing() && !bEnabledInput) {
+		dialogDisplayer->dontShow();
 	}
 
 	player->update(fElapsedTime);

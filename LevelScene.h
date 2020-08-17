@@ -8,6 +8,8 @@ private:
 	float startingPosX;
 	float startingPosY;
 
+	bool bCutscenePlayed;
+
 	Player* player;
 	std::unique_ptr<TileMap> sceneMap;
 	std::unique_ptr<sf::View> camera;

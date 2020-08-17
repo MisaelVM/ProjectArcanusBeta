@@ -533,6 +533,10 @@ sf::Sprite TileMap::GetTile(int row, int column) {
 		*Tile = ArrayTile["gp_arboleda4"];
 		Tile->setPosition(sizeoftile * column, sizeoftile * row);
 		break;
+	case '+':
+		*Tile = ArrayTile["ab_pasto1"];
+		Tile->setPosition(sizeoftile * column, sizeoftile * row);
+		break;
 	}
 	return *Tile;
 }
