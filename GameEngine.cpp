@@ -100,10 +100,11 @@ void GameEngine::updateEvents() {
 }
 
 void GameEngine::update() { // Updates data in general
-    updateElapsedTime(); // Always updating the Elapsed Time
+    std::thread t1(&GameEngine::updateElapsedTime, this);
+    std::thread t2(&GameEngine::checkUserInput, this);
+    std::thread t3(&GameEngine::checkCloseGame, this);
     updateEvents();
-    checkUserInput();
-    checkCloseGame();
+    t1.join(); t2.join(); t3.join();
     gameState->update(fElapsedTime);
     checkChangedSettings();
 

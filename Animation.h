@@ -4,6 +4,9 @@
 #include <list>
 #include <string>
 #include <memory>
+#include <thread>
+#include <future>
+#include <mutex>
 
 #include "SFML/System.hpp"
 #include "SFML/Window.hpp"
