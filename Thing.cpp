@@ -20,7 +20,15 @@ void Thing::draw(sf::RenderTarget* window) {
 void Thing::setPosition(const float x, const float y)
 {
 	this->body->setPosition(x, y);
-	this->hitbox->setPosition(x+17.5f,y+140.0f+15.0f);
+	this->hitbox->setPosition(x+17.5f,y+15.0f);
+}
+void Thing::setHitboxposition(const int x, const int y)
+{
+	this->hitbox->setPosition(body->getPosition().x + (x * 35.0f) + 17.5, body->getPosition().y + (y * 35.0f) + 15.0f);
+}
+void Thing::setHitboxsize(const int width, const int height)
+{
+	this->hitbox->setSize(sf::Vector2f(35.0f*width,35.0f*height));
 }
 Collider Thing::GetCollider()
 {
